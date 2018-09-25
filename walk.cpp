@@ -16,6 +16,7 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "fonts.h"
+#include <string>
 
 //defined types
 typedef double Flt;
@@ -114,6 +115,7 @@ public:
 	int done;
 	int xres, yres;
 	int walk;
+	bool credits = false;
 	int walkFrame;
 	double delay;
 	GLuint walkTexture;
@@ -219,6 +221,7 @@ int checkKeys(XEvent *e);
 void init();
 void physics(void);
 void render(void);
+void show_credits();
 
 
 int main(void)
@@ -241,6 +244,17 @@ int main(void)
 	return 0;
 }
 
+void show_credits()
+{
+    Rect r;
+    unsigned int c = 0x0027c1ee;
+    r.bot = g.yres - 20;
+    r.left = g.xres/2 - 30;
+    r.center = 0;
+    ggprint8b(&r, 20, c, "CREDITS");
+
+
+}
 unsigned char *buildAlphaData(Image *img)
 {
 	//add 4th component to RGB stream...
@@ -351,6 +365,7 @@ int checkKeys(XEvent *e)
 {
 	//keyboard input?
 	static int shift=0;
+	const char * test = "hello";
 	if (e->type != KeyRelease && e->type != KeyPress)
 		return 0;
 	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
@@ -368,6 +383,12 @@ int checkKeys(XEvent *e)
 		case XK_w:
 			timers.recordTime(&timers.walkTime);
 			g.walk ^= 1;
+			break;
+		case XK_c:
+			if (g.credits == false)
+			    g.credits = true;
+			else
+			    g.credits = false;
 			break;
 		case XK_Left:
 			break;
@@ -500,9 +521,23 @@ void render(void)
 	glDisable(GL_ALPHA_TEST);
 	//
 	unsigned int c = 0x00ffff44;
+	if (g.credits) {
+	  //  extern const char * sb;
+	  //  extern const char * aa;
+	  //  show_credits(sb,aa);
+	  int x = g.xres/2 - 30;
+	  int y = g.yres - 20;
+	  extern void show_credits_Alberto(int x,int y);
+	  extern void show_credits_Sergio(int x,int y);
+	  show_credits();
+	  show_credits_Alberto(x,y-20);
+	  show_credits_Sergio(x,y-40);
+	    return;
+	}
 	r.bot = g.yres - 20;
 	r.left = 10;
 	r.center = 0;
+	ggprint8b(&r, 16, c, "C   Credits");
 	ggprint8b(&r, 16, c, "W   Walk cycle");
 	ggprint8b(&r, 16, c, "+   faster");
 	ggprint8b(&r, 16, c, "-   slower");
