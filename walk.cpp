@@ -247,7 +247,7 @@ int main(void)
 void show_credits()
 {
     Rect r;
-    unsigned int c = 0x0027c1ee;
+    unsigned int c = 0x00ff3333;
     r.bot = g.yres - 20;
     r.left = g.xres/2 - 30;
     r.center = 0;
@@ -365,7 +365,6 @@ int checkKeys(XEvent *e)
 {
 	//keyboard input?
 	static int shift=0;
-	const char * test = "hello";
 	if (e->type != KeyRelease && e->type != KeyPress)
 		return 0;
 	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
