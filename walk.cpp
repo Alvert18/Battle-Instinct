@@ -2,6 +2,7 @@
 //program: walk.cpp
 //author:  Gordon Griesel
 //date:    summer 2017 - 2018
+//modified by: Alberto Acevedo, Sergio Benavides, Guadalupe Nunez
 //
 //Walk cycle using a sprite sheet.
 //images courtesy: http://games.ucla.edu/resource/walk-cycles/

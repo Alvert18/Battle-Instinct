@@ -1,3 +1,5 @@
+//Sergio Benavides
+//date: 9/25/2018
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
