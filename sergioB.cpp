@@ -27,21 +27,28 @@ void show_credits_Sergio (int x, int y)
 
 }
 
-void showSergioPicture(int x, int y, float tx, float ty, GLuint texid)
+void showSergioPicture(int x, int y, GLuint texid)
 {
     int wid=40;
     glPushMatrix();
     glTranslatef(x, y, 0);
     glBindTexture(GL_TEXTURE_2D, texid);
-    glBegin(GL_QUADS);
+  /*  glBegin(GL_QUADS);
     	glTexCoord2f(tx, ty+.5); glVertex2i(-wid, -wid);
         glTexCoord2f(tx, ty); glVertex2i(-wid, wid);
         glTexCoord2f(tx+.125, ty); glVertex2i(wid, wid);
         glTexCoord2f(tx+.125, ty+.5); glVertex2i(wid, -wid);
     glEnd();
+    */
+     glBegin(GL_QUADS);
+                glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid, -wid);
+                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+                glTexCoord2f(1.0f, 0.0f); glVertex2i(wid, wid);
+                glTexCoord2f(1.0f, 1.0f); glVertex2i(wid, -wid);
+          glEnd();
+
+    
     glPopMatrix();
-    glBindTexture(GL_TEXTURE_2D,0);
-    glDisable(GL_ALPHA_TEST);
       return;
 }
 	

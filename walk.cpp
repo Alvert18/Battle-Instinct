@@ -84,8 +84,8 @@ public:
 	}
 };
 Image img[2] = {
-"./images/walk.gif",
-"./images/dog.jpg" };
+    "./images/walk.gif",
+    "./images/dog.jpg"} ;
 
 
 //-----------------------------------------------------------------------------
@@ -293,14 +293,13 @@ unsigned char *buildAlphaData(Image *img)
 void initOpengl(void)
 {
 	//OpenGL initialization
-	glGenTextures(1, &g.sergioTexture);
 	int w = img[0].width;
 	int h = img[0].height;
-	glBindTexture(GL_TEXTURE_2D, g.sergioTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
 		GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
+
 
 
 	glViewport(0, 0, g.xres, g.yres);
@@ -324,11 +323,13 @@ void initOpengl(void)
 	//
 	//load the images file into a ppm structure.
 	//
-	//int w = img[0].width;
-	//int h = img[0].height;
+	int w2 = img[1].width;
+	int h2 = img[1].height;
 	//
 	//create opengl texture elements
 	glGenTextures(1, &g.walkTexture);
+	glGenTextures(1, &g.sergioTexture);
+
 
 	//-------------------------------------------------------------------------
 	//silhouette
@@ -346,6 +347,16 @@ void initOpengl(void)
 	//free(walkData);
 	//unlink("./images/walk.ppm");
 	//-------------------------------------------------------------------------
+	//Dog picture
+	glBindTexture(GL_TEXTURE_2D, g.sergioTexture);
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w2, h2, 0,
+		GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
+	unsigned char *sergioData = buildAlphaData(&img[1]);	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, sergioData);
 }
 
 void init() {
@@ -544,8 +555,8 @@ void render(void)
 	  int y = g.yres - 20;
 	  extern void show_credits_Alberto(int x,int y);
 	  extern void show_credits_Sergio(int x,int y);
-	  extern void showSergioPicture(int x, int y, float tx, float ty, GLuint texid);
-	  showSergioPicture (x-100, y-40, tx, ty, g.sergioTexture);
+	  extern void showSergioPicture(int x, int y, GLuint texid);
+	  showSergioPicture (x-100, y-40, g.sergioTexture);
 	  show_credits();
 	  show_credits_Alberto(x,y-20);
 	  show_credits_Sergio(x,y-40);

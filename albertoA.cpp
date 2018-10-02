@@ -32,11 +32,8 @@ void show_credits_Alberto_pic (int x, int y,float tx, float ty, GLuint texid)
      int wid =40;
      y = y -40;
      glPushMatrix();
-<<<<<<< HEAD
      glTranslatef(x+100,y+40,0);
-=======
      glTranslatef(x-100,y-40,0);
->>>>>>> 506bf39771f7fa1cad643979b15bb4b7ac6ac5fc
      glColor3f(1.0, 1.0, 1.0);
      glBindTexture(GL_TEXTURE_2D, texid);
      glBegin(GL_QUADS);
