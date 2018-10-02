@@ -83,7 +83,9 @@ public:
 		unlink(ppmname);
 	}
 };
-Image img[1] = {"images/walk.gif"};
+Image img[2] = {
+"./images/walk.gif",
+"./images/dog.jpg" };
 
 
 //-----------------------------------------------------------------------------
@@ -111,6 +113,7 @@ public:
 } timers;
 //-----------------------------------------------------------------------------
 
+
 class Global {
 public:
 	int done;
@@ -120,6 +123,7 @@ public:
 	int walkFrame;
 	double delay;
 	GLuint walkTexture;
+	GLuint sergioTexture;
 	Vec box[20];
 	Global() {
 		done=0;
@@ -289,6 +293,16 @@ unsigned char *buildAlphaData(Image *img)
 void initOpengl(void)
 {
 	//OpenGL initialization
+	glGenTextures(1, &g.sergioTexture);
+	int w = img[0].width;
+	int h = img[0].height;
+	glBindTexture(GL_TEXTURE_2D, g.sergioTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+		GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
+
+
 	glViewport(0, 0, g.xres, g.yres);
 	//Initialize matrices
 	glMatrixMode(GL_PROJECTION); glLoadIdentity();
@@ -310,11 +324,12 @@ void initOpengl(void)
 	//
 	//load the images file into a ppm structure.
 	//
-	int w = img[0].width;
-	int h = img[0].height;
+	//int w = img[0].width;
+	//int h = img[0].height;
 	//
 	//create opengl texture elements
 	glGenTextures(1, &g.walkTexture);
+
 	//-------------------------------------------------------------------------
 	//silhouette
 	//this is similar to a sprite graphic
@@ -529,10 +544,30 @@ void render(void)
 	  int y = g.yres - 20;
 	  extern void show_credits_Alberto(int x,int y);
 	  extern void show_credits_Sergio(int x,int y);
+	  extern void showSergioPicture(int x, int y, float tx, float ty, GLuint texid);
+	  showSergioPicture (x-100, y-40, tx, ty, g.sergioTexture);
 	  show_credits();
 	  show_credits_Alberto(x,y-20);
 	  show_credits_Sergio(x,y-40);
+
+	  extern void show_credits_Alberto_pic(int x, int y, float tx, float ty, GLuint texid);
+	  show_credits_Alberto_pic(x+50,  y-40,  tx, ty, g.walkTexture);
+
+	  //show dog pic
+	 /* 
+	  int wid=40;
+	  glPushMatrix();
+	  glTranslatef(200, 200, 0);
+	  glBindTexture(GL_TEXTURE_2D, g.sergioTexture);
+	  glBegin(GL_QUADS);
+	  	glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid, -wid);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+		glTexCoord2f(1.0f, 0.0f); glVertex2i(wid, wid);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i(wid, -wid);
+	  glEnd();
+	  glPopMatrix();
 	    return;
+	    */
 	}
 	r.bot = g.yres - 20;
 	r.left = 10;
