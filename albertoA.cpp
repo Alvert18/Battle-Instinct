@@ -1,5 +1,9 @@
-//Alberto Acevedo
-//date: 9/25/2018
+/*Alberto Acevedo
+date: 9/25/2018
+Individual file for:
+- Showing credits
+*- Showing picture in credits
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,14 +30,18 @@ void show_credits_Alberto (int x, int y)
 
 }
 
-void show_credits_Alberto_pic (int x, int y,float tx, float ty, GLuint texid) 
+void showAlbertoPicture (int x, int y,float tx, float ty, GLuint texid) 
 {
-     
      int wid =40;
+     static float fx = 0.0f;
+     static float angle = 0.0f;
+     static float angle2 = 0.0f;
+
+     angle += 0.01;
+     fx = sin(angle);
      y = y -40;
      glPushMatrix();
-     glTranslatef(x+100,y+40,0);
-     glTranslatef(x-100,y-40,0);
+     glTranslatef(x + (int)(fx*30.0),y,0);
      glColor3f(1.0, 1.0, 1.0);
      glBindTexture(GL_TEXTURE_2D, texid);
      glBegin(GL_QUADS);
@@ -41,10 +49,9 @@ void show_credits_Alberto_pic (int x, int y,float tx, float ty, GLuint texid)
         glTexCoord2f(tx, ty);    glVertex2i(-wid, wid);
         glTexCoord2f(tx+.125,ty);    glVertex2i(wid, wid);
         glTexCoord2f(tx+.125,ty+.5); glVertex2i(wid, -wid);
+	
      glEnd();
      glPopMatrix();
      glBindTexture(GL_TEXTURE_2D, 0);
      glDisable(GL_ALPHA_TEST);
-
-
 }

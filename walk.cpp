@@ -83,9 +83,10 @@ public:
 		unlink(ppmname);
 	}
 };
-Image img[2] = {
+Image img[3] = {
     "./images/walk.gif",
-    "./images/dog.jpg"} ;
+    "./images/dog.jpg",
+    "./images/bunny.png"} ;
 
 
 //-----------------------------------------------------------------------------
@@ -124,6 +125,7 @@ public:
 	double delay;
 	GLuint walkTexture;
 	GLuint sergioTexture;
+	GLuint guadalupeTexture;
 	Vec box[20];
 	Global() {
 		done=0;
@@ -325,10 +327,13 @@ void initOpengl(void)
 	//
 	int w2 = img[1].width;
 	int h2 = img[1].height;
+	int w3 = img[2].width;
+	int h3 = img[2].height;
 	//
 	//create opengl texture elements
 	glGenTextures(1, &g.walkTexture);
 	glGenTextures(1, &g.sergioTexture);
+	glGenTextures(1, &g.guadalupeTexture);
 
 
 	//-------------------------------------------------------------------------
@@ -357,6 +362,17 @@ void initOpengl(void)
 	unsigned char *sergioData = buildAlphaData(&img[1]);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0,
 		GL_RGBA, GL_UNSIGNED_BYTE, sergioData);
+	//-------------------------------------------------------------------------
+	//Bunny picture
+	glBindTexture(GL_TEXTURE_2D, g.guadalupeTexture);
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
+		GL_RGB, GL_UNSIGNED_BYTE, img[2].data);
+	unsigned char *guadalupeData = buildAlphaData(&img[2]);	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w3, h3, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, guadalupeData);
 }
 
 void init() {
@@ -547,22 +563,26 @@ void render(void)
 	glDisable(GL_ALPHA_TEST);
 	//
 	unsigned int c = 0x00ffff44;
-	if (g.credits) {
-	  //  extern const char * sb;
-	  //  extern const char * aa;
-	  //  show_credits(sb,aa);
-	  int x = g.xres/2 - 30;
-	  int y = g.yres - 20;
-	  extern void show_credits_Alberto(int x,int y);
-	  extern void show_credits_Sergio(int x,int y);
-	  extern void showSergioPicture(int x, int y, GLuint texid);
-	  showSergioPicture (x-100, y-40, g.sergioTexture);
-	  show_credits();
-	  show_credits_Alberto(x,y-20);
-	  show_credits_Sergio(x,y-40);
 
-	  extern void show_credits_Alberto_pic(int x, int y, float tx, float ty, GLuint texid);
-	  show_credits_Alberto_pic(x+50,  y-40,  tx, ty, g.walkTexture);
+	//Show Credits
+	if (g.credits) {
+	    int x = g.xres/2 - 30;
+	    int y = g.yres - 20;
+	    extern void show_credits_Alberto(int x,int y);
+	    extern void show_credits_Sergio(int x,int y);
+	    extern void showLupeName(int x, int y);
+	    extern void showSergioPicture(int x, int y, GLuint texid);
+	    extern void showAlbertoPicture(int x, int y, float tx, float ty, GLuint texid);
+	    extern void showLupePicture(int x, int y, GLuint texid);
+
+	    showSergioPicture (x-100, y-40, g.sergioTexture);
+	    showAlbertoPicture(x+200,  y-40,  tx, ty, g.walkTexture);
+	    showLupePicture(x-100, y-150, g.guadalupeTexture);
+	    show_credits();
+	    show_credits_Alberto(x,y-20);
+	    show_credits_Sergio(x,y-40);
+	    showLupeName(x,y-60);
+	    
 
 	  //show dog pic
 	 /* 

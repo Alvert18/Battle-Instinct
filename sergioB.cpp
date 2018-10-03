@@ -30,8 +30,14 @@ void show_credits_Sergio (int x, int y)
 void showSergioPicture(int x, int y, GLuint texid)
 {
     int wid=40;
+    static float fx = 0.0f;
+    static float angle = 0.0f;
+    static float angle2 = 0.0f;
+
+    angle += 0.2;
+    fx = sin(angle);
     glPushMatrix();
-    glTranslatef(x, y, 0);
+    glTranslatef(x + (int)(fx*20.0), y, 0);
     glBindTexture(GL_TEXTURE_2D, texid);
   /*  glBegin(GL_QUADS);
     	glTexCoord2f(tx, ty+.5); glVertex2i(-wid, -wid);
