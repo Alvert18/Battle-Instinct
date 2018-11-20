@@ -84,10 +84,10 @@ public:
 	}
 };
 Image img[3] = {
-    "./images/walk.gif",
+    "./images/Kang-Walk.gif",
     "./images/dog.jpg",
-    "./images/bunny.png"} ;
-
+    "./images/bunny.png",
+};
 
 //-----------------------------------------------------------------------------
 //Setup timers
@@ -141,6 +141,13 @@ public:
 		}
 	}
 } g;
+
+class Player {
+    public:
+	Vec pos;
+	Vec vel;
+	Vec lastpos;
+}player;
 
 class X11_wrapper {
 private:
@@ -347,6 +354,7 @@ void initOpengl(void)
 	//
 	//must build a new set of data...
 	unsigned char *walkData = buildAlphaData(&img[0]);	
+	printf("h = %d \n w = %d",h,w);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
 		GL_RGBA, GL_UNSIGNED_BYTE, walkData);
 	//free(walkData);
@@ -376,7 +384,11 @@ void initOpengl(void)
 }
 
 void init() {
-
+    player.pos[0] = 100.0;
+    player.pos[1] = (double)(g.yres-200);
+    MakeVector(6.0,0.0,0.0, player.vel);
+    VecCopy(player.pos, player.lastpos);
+    
 }
 
 void checkMouse(XEvent *e)
@@ -433,8 +445,14 @@ int checkKeys(XEvent *e)
 			    g.credits = false;
 			break;
 		case XK_Left:
+			VecCopy(player.pos, player.lastpos);
+			player.pos[0] -= 10.0;
+			g.walk^=1;
 			break;
 		case XK_Right:
+			VecCopy(player.pos, player.lastpos);
+			player.pos[0] += 10.0;
+			g.walk^=1;
 			break;
 		case XK_Up:
 			break;
@@ -540,23 +558,24 @@ void render(void)
 	float h = 200.0;
 	float w = h * 0.5;
 	glPushMatrix();
+	glTranslatef(player.pos[0],0,player.pos[2]);
 	glColor3f(1.0, 1.0, 1.0);
 	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
 	//
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0f);
 	glColor4ub(255,255,255,255);
-	int ix = g.walkFrame % 8;
+	int ix = g.walkFrame % 7;
 	int iy = 0;
-	if (g.walkFrame >= 8)
+	if (g.walkFrame >= 7)
 		iy = 1;
-	float tx = (float)ix / 8.0;
-	float ty = (float)iy / 2.0;
+	float tx = (float)ix / 7.0;
+	float ty = (float)iy / 1.0;
 	glBegin(GL_QUADS);
-		glTexCoord2f(tx,      ty+.5); glVertex2i(cx-w, cy-h);
+		glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
 		glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
-		glTexCoord2f(tx+.125, ty);    glVertex2i(cx+w, cy+h);
-		glTexCoord2f(tx+.125, ty+.5); glVertex2i(cx+w, cy-h);
+		glTexCoord2f(tx+.1, ty);    glVertex2i(cx+w, cy+h);
+		glTexCoord2f(tx+.1, ty+1); glVertex2i(cx+w, cy-h);
 	glEnd();
 	glPopMatrix();
 	glBindTexture(GL_TEXTURE_2D, 0);
