@@ -123,6 +123,9 @@ public:
 	bool credits = false;
 	int walkFrame;
 	double delay;
+	//Booleans
+	bool inMainMenu = true;
+	bool inGame = false;
 	GLuint walkTexture;
 	GLuint sergioTexture;
 	GLuint guadalupeTexture;
@@ -141,6 +144,8 @@ public:
 		}
 	}
 } g;
+
+int selected = 1;
 
 class Player {
     public:
@@ -228,6 +233,9 @@ public:
 
 } x11;
 
+//external function prototypes
+extern void showMainMenu(int,int);
+
 //function prototypes
 void initOpengl(void);
 void checkMouse(XEvent *e);
@@ -251,7 +259,8 @@ int main(void)
 			done = checkKeys(&e);
 		}
 		physics();
-		render();
+		//render();
+		showMainMenu(g.xres,g.yres);
 		x11.swapBuffers();
 	}
 	cleanup_fonts();
@@ -433,10 +442,22 @@ int checkKeys(XEvent *e)
 		return 0;
 	}
 	(void)shift;
-	switch (key) {
-		case XK_w:
-			timers.recordTime(&timers.walkTime);
-			g.walk ^= 1;
+
+	if (g.inMainMenu) {
+		switch (key) {
+			case XK_Up:
+				selected++;
+				break;
+			case XK_Down:
+				selected--;
+				break;
+		}
+	}
+	if (g.inGame) {	
+		switch (key) {
+			case XK_w:
+				timers.recordTime(&timers.walkTime);
+				g.walk ^= 1;
 			break;
 		case XK_c:
 			if (g.credits == false)
@@ -469,6 +490,7 @@ int checkKeys(XEvent *e)
 		case XK_Escape:
 			return 1;
 			break;
+	}
 	}
 	return 0;
 }

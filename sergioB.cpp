@@ -15,6 +15,7 @@
 
 using namespace std;
 
+extern int selected;
 
 void show_credits_Sergio (int x, int y)
 {
@@ -58,5 +59,45 @@ void showSergioPicture(int x, int y, GLuint texid)
       return;
 }
 	
+void showMainMenu(int x, int y) {
 
+    int px, py;
+
+    Rect r;
+    unsigned int c = 0x0027c1ee;
+    r.bot = y - 400;
+    r.left = x/2 - 45;
+    r.center = 0;
+    ggprint12(&r, 20, c, "Start");
+    ggprint12(&r, 20, c, "Tutorial");
+
+    Rect r2;
+    r2.bot = y - 400;
+    r2.left = x/2 - 45;
+    r2.center = 0;
+
+    if (selected == 1) {
+	px = x/2 - 73;
+	py = y - 390;
+	ggprint12(&r2, 20, 0x000000, "Start");
+    } else if (selected == 2) {
+	px = x/2 - 73;
+        py = y - 407;	
+	ggprint12(&r2, 20, 0x000000, " ");
+	ggprint12(&r2, 20, 0x000000, "Tutorial");
+    }
+    float w = 5.0;
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glPushMatrix();
+    glTranslatef(px, py, 0);
+    glColor4ub(255, 255, 255, 255);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 1.0f); glVertex2i( w, w);
+    glTexCoord2f(1.0f, 1.0f); glVertex2i( w,-w);
+    glTexCoord2f(1.0f, 0.0f); glVertex2i(-w,-w);
+    glTexCoord2f(0.0f, 0.0f); glVertex2i(-w, w);
+    glEnd();
+    glPopMatrix();
+
+}
 
