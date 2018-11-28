@@ -58,13 +58,33 @@ void showSergioPicture(int x, int y, GLuint texid)
     glPopMatrix();
       return;
 }
-	
-void showMainMenu(int x, int y) {
+bool inMainMenu = true;
+bool inGame = false;
+
+void showMainMenu(int x, int y, GLuint MainMenuTexture) 
+{
 
     int px, py;
 
+    float w = x;
+    float h = y;
+    glPushMatrix();
+    glTranslatef(600, 800, 0);
+    glBindTexture(GL_TEXTURE_2D, MainMenuTexture);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.0f);
+    glColor4ub(255, 255, 255, 255);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 1.0f); glVertex2i( -w, h);
+    glTexCoord2f(1.0f, 1.0f); glVertex2i( -w, -h);
+    glTexCoord2f(1.0f, 0.0f); glVertex2i( w,  -h);
+    glTexCoord2f(0.0f, 0.0f); glVertex2i(-w, h);
+    glEnd();
+    glPopMatrix();
     Rect r;
-    unsigned int c = 0x0027c1ee;
+
+    //unsigned int c = 0x0027c1ee;
+    unsigned int c = 0x00ffffff;
     r.bot = y - 400;
     r.left = x/2 - 45;
     r.center = 0;
@@ -79,25 +99,13 @@ void showMainMenu(int x, int y) {
     if (selected == 1) {
 	px = x/2 - 73;
 	py = y - 390;
-	ggprint12(&r2, 20, 0x000000, "Start");
+	ggprint12(&r2, 20, 0xFF0000, "Start");
     } else if (selected == 2) {
 	px = x/2 - 73;
         py = y - 407;	
-	ggprint12(&r2, 20, 0x000000, " ");
-	ggprint12(&r2, 20, 0x000000, "Tutorial");
+	ggprint12(&r2, 20, 0xFF0000, " ");
+	ggprint12(&r2, 20, 0xFF0000, "Tutorial");
     }
-    float w = 5.0;
-    glColor3f(1.0f, 1.0f, 1.0f);
-    glPushMatrix();
-    glTranslatef(px, py, 0);
-    glColor4ub(255, 255, 255, 255);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 1.0f); glVertex2i( w, w);
-    glTexCoord2f(1.0f, 1.0f); glVertex2i( w,-w);
-    glTexCoord2f(1.0f, 0.0f); glVertex2i(-w,-w);
-    glTexCoord2f(0.0f, 0.0f); glVertex2i(-w, w);
-    glEnd();
-    glPopMatrix();
 
 }
 

@@ -83,10 +83,11 @@ public:
 		unlink(ppmname);
 	}
 };
-Image img[3] = {
+Image img[4] = {
     "./images/Kang-Walk.gif",
     "./images/dog.jpg",
     "./images/bunny.png",
+    "./images/MainMenu.png",
 };
 
 //-----------------------------------------------------------------------------
@@ -124,11 +125,12 @@ public:
 	int walkFrame;
 	double delay;
 	//Booleans
-	bool inMainMenu = true;
-	bool inGame = false;
+//	bool inMainMenu = true;
+//	bool inGame = false;
 	GLuint walkTexture;
 	GLuint sergioTexture;
 	GLuint guadalupeTexture;
+	GLuint MainMenuTexture;
 	Vec box[20];
 	Global() {
 		done=0;
@@ -234,8 +236,9 @@ public:
 } x11;
 
 //external function prototypes
-extern void showMainMenu(int,int);
-
+extern void showMainMenu(int,int,GLuint);
+extern bool inMainMenu;
+extern bool inGame;
 //function prototypes
 void initOpengl(void);
 void checkMouse(XEvent *e);
@@ -259,8 +262,9 @@ int main(void)
 			done = checkKeys(&e);
 		}
 		physics();
+		render();
+	//	showMainMenu(g.xres,g.yres);
 		//render();
-		showMainMenu(g.xres,g.yres);
 		x11.swapBuffers();
 	}
 	cleanup_fonts();
@@ -345,11 +349,14 @@ void initOpengl(void)
 	int h2 = img[1].height;
 	int w3 = img[2].width;
 	int h3 = img[2].height;
+	int w4 = img[3].width;
+	int h4 = img[3].height;
 	//
 	//create opengl texture elements
 	glGenTextures(1, &g.walkTexture);
 	glGenTextures(1, &g.sergioTexture);
 	glGenTextures(1, &g.guadalupeTexture);
+	glGenTextures(1, &g.MainMenuTexture);
 
 
 	//-------------------------------------------------------------------------
@@ -390,6 +397,17 @@ void initOpengl(void)
 	unsigned char *guadalupeData = buildAlphaData(&img[2]);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w3, h3, 0,
 		GL_RGBA, GL_UNSIGNED_BYTE, guadalupeData);
+	//------------------------------------------------------------------------
+	//Main Menu Picture
+	glBindTexture(GL_TEXTURE_2D, g.MainMenuTexture);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, w4, h4, 0,
+                GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+//        unsigned char *mainData = buildAlphaData(&img[3]);
+  //      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w4, h4, 0,
+    //            GL_RGBA, GL_UNSIGNED_BYTE, mainData);	
 }
 
 void init() {
@@ -443,17 +461,33 @@ int checkKeys(XEvent *e)
 	}
 	(void)shift;
 
-	if (g.inMainMenu) {
+	if (inMainMenu) {
 		switch (key) {
-			case XK_Up:
-				selected++;
+
+		    	case XK_Return: 
+			    	if(selected == 1) {
+				    inGame = true;
+				    inMainMenu = false;	    
+				}
+				//printf("Return entered!! \n");
+				break;
+		    	case XK_Up:
+				if (selected == 1)
+				    selected = 1;
+				else
+				    selected--;
+			        printf("selected : %d\n",selected);
 				break;
 			case XK_Down:
-				selected--;
+				if (selected == 2)
+				    selected = 2;
+				else	
+				selected++;
+			        printf("selected : %d\n",selected);
 				break;
 		}
 	}
-	if (g.inGame) {	
+	if (inGame) {	
 		switch (key) {
 			case XK_w:
 				timers.recordTime(&timers.walkTime);
@@ -538,7 +572,16 @@ void physics(void)
 
 void render(void)
 {
-	Rect r;
+	printf("ingame = %d\n",inGame);
+	printf("inMain = %d\n",inMainMenu);
+    	if(inMainMenu) { 
+	    showMainMenu(g.xres, g.yres,g.MainMenuTexture);
+		    
+
+	}
+	else if(inGame)
+	{
+    	Rect r;
 	//Clear the screen
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -554,16 +597,6 @@ void render(void)
 		glVertex2i(g.xres,   0);
 		glVertex2i(0,         0);
 	glEnd();
-	//
-	//fake shadow
-	//glColor3f(0.25, 0.25, 0.25);
-	//glBegin(GL_QUADS);
-	//	glVertex2i(cx-60, 150);
-	//	glVertex2i(cx+50, 150);
-	//	glVertex2i(cx+50, 130);
-	//	glVertex2i(cx-60, 130);
-	//glEnd();
-	//
 	//show boxes as background
 	for (int i=0; i<20; i++) {
 		glPushMatrix();
@@ -616,7 +649,7 @@ void render(void)
 	    extern void showAlbertoPicture(int x, int y, float tx, float ty, GLuint texid);
 	    extern void showLupePicture(int x, int y, GLuint texid);
 
-	    showSergioPicture (x-100, y-40, g.sergioTexture);
+	    showSergioPicture (x-100, y-40, g.MainMenuTexture);
 	    showAlbertoPicture(x+200,  y-40,  tx, ty, g.walkTexture);
 	    showLupePicture(x-100, y-150, g.guadalupeTexture);
 	    show_credits();
@@ -652,7 +685,7 @@ void render(void)
 	ggprint8b(&r, 16, c, "left arrow  <- walk left");
 	ggprint8b(&r, 16, c, "frame: %i", g.walkFrame);
 }
-
+}
 
 
 
