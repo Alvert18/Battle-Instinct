@@ -78,7 +78,7 @@ void showMainMenu(int x, int y, GLuint MainMenuTexture)
     glTexCoord2f(0.0f, 1.0f); glVertex2i( -w, h);
     glTexCoord2f(1.0f, 1.0f); glVertex2i( -w, -h);
     glTexCoord2f(1.0f, 0.0f); glVertex2i( w,  -h);
-    glTexCoord2f(0.0f, 0.0f); glVertex2i(-w, h);
+    glTexCoord2f(0.0f, 0.0f); glVertex2i(w, h);
     glEnd();
     glPopMatrix();
     Rect r;
