@@ -9,6 +9,156 @@
 //
 
 #include "lib.h"
+#include "img.h"
+
+
+Image img[4] = {
+    "./images/Kang-Walk.gif",
+    "./images/dog.jpg",
+    "./images/bunny.png",
+    "./images/MainMenu.png",
+};
+
+unsigned char *buildAlphaData(Image *img) {
+	//add 4th component to RGB stream...
+	int i;
+	unsigned char *newdata, *ptr;
+	unsigned char *data = (unsigned char *)img->data;
+	newdata = (unsigned char *)malloc(img->width * img->height * 4);
+	ptr = newdata;
+	unsigned char a,b,c;
+	//use the first pixel in the image as the transparent color.
+	unsigned char t0 = *(data+0);
+	unsigned char t1 = *(data+1);
+	unsigned char t2 = *(data+2);
+	for (i=0; i<img->width * img->height * 3; i+=3) {
+		a = *(data+0);
+		b = *(data+1);
+		c = *(data+2);
+		*(ptr+0) = a;
+		*(ptr+1) = b;
+		*(ptr+2) = c;
+		*(ptr+3) = 1;
+		if (a==t0 && b==t1 && c==t2)
+			*(ptr+3) = 0;
+		//-----------------------------------------------
+		ptr += 4;
+		data += 3;
+	}
+	return newdata;
+}
+class Global {
+public:
+        int done;
+        int xres, yres;
+        int walk;
+        bool credits = false;
+        int walkFrame;
+        double delay;
+        //Booleans
+//      bool inMainMenu = true;
+//      bool inGame = false;
+        GLuint walkTexture;
+        GLuint sergioTexture;
+        GLuint guadalupeTexture;
+        GLuint MainMenuTexture;
+	GLuint TutorialTexture;
+        Vec box[20];
+        Global() {
+                done=0;
+                xres=800;
+                yres=600;
+                walk=0;
+                walkFrame=0;
+                delay = 0.1;
+                for (int i=0; i<20; i++) {
+                        box[i][0] = rnd() * xres;
+                        box[i][1] = rnd() * (yres-220) + 220.0;
+                        box[i][2] = 0.0;
+                }
+        }
+} g;
+
+//--------------------------------------------------------------------------------------------
+
+class X11_wrapper {
+private:
+        Display *dpy;
+        Window win;
+public:
+        X11_wrapper() {
+                GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+                //GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, None };
+                XSetWindowAttributes swa;
+                setupScreenRes(g.xres, g.yres);
+                dpy = XOpenDisplay(NULL);
+                if (dpy == NULL) {
+                        printf("\n\tcannot connect to X server\n\n");
+                        exit(EXIT_FAILURE);
+                }
+                Window root = DefaultRootWindow(dpy);
+                XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
+                if (vi == NULL) {
+                        printf("\n\tno appropriate visual found\n\n");
+                        exit(EXIT_FAILURE);
+                }
+                Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
+                swa.colormap = cmap;
+                swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
+                                                        StructureNotifyMask | SubstructureNotifyMask;
+                win = XCreateWindow(dpy, root, 0, 0, g.xres, g.yres, 0,
+                                                                vi->depth, InputOutput, vi->visual,
+                                                                CWColormap | CWEventMask, &swa);
+                GLXContext glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+                glXMakeCurrent(dpy, win, glc);
+                setTitle();
+        }
+        ~X11_wrapper() {
+                XDestroyWindow(dpy, win);
+                XCloseDisplay(dpy);
+        }
+        void setTitle() {
+                //Set the window title bar.
+                XMapWindow(dpy, win);
+                XStoreName(dpy, win, "Walk Cycle");
+        }
+        void setupScreenRes(const int w, const int h) {
+                g.xres = w;
+                g.yres = h;
+        }
+        void reshapeWindow(int width, int height) {
+                //window has been resized.
+                setupScreenRes(width, height);
+                glViewport(0, 0, (GLint)width, (GLint)height);
+                glMatrixMode(GL_PROJECTION); glLoadIdentity();
+                glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+                glOrtho(0, g.xres, 0, g.yres, -1, 1);
+                setTitle();
+        }
+        void checkResize(XEvent *e) {
+                //The ConfigureNotify is sent by the
+                //server if the window is resized.
+                if (e->type != ConfigureNotify)
+                        return;
+                XConfigureEvent xce = e->xconfigure;
+                if (xce.width != g.xres || xce.height != g.yres) {
+                        //Window size did change.
+                        reshapeWindow(xce.width, xce.height);
+                }
+        }
+        bool getXPending() {
+                return XPending(dpy);
+        }
+        XEvent getXNextEvent() {
+                XEvent e;
+                XNextEvent(dpy, &e);
+                return e;
+        }
+        void swapBuffers() {
+                glXSwapBuffers(dpy, win);
+        }
+
+} x11;
 
 //-----------------------------------------------------------------------------
 //Setup timers
@@ -93,35 +243,6 @@ void show_credits()
     ggprint8b(&r, 20, c, "CREDITS");
 
 
-}
-unsigned char *buildAlphaData(Image *img)
-{
-	//add 4th component to RGB stream...
-	int i;
-	unsigned char *newdata, *ptr;
-	unsigned char *data = (unsigned char *)img->data;
-	newdata = (unsigned char *)malloc(img->width * img->height * 4);
-	ptr = newdata;
-	unsigned char a,b,c;
-	//use the first pixel in the image as the transparent color.
-	unsigned char t0 = *(data+0);
-	unsigned char t1 = *(data+1);
-	unsigned char t2 = *(data+2);
-	for (i=0; i<img->width * img->height * 3; i+=3) {
-		a = *(data+0);
-		b = *(data+1);
-		c = *(data+2);
-		*(ptr+0) = a;
-		*(ptr+1) = b;
-		*(ptr+2) = c;
-		*(ptr+3) = 1;
-		if (a==t0 && b==t1 && c==t2)
-			*(ptr+3) = 0;
-		//-----------------------------------------------
-		ptr += 4;
-		data += 3;
-	}
-	return newdata;
 }
 
 void initOpengl(void)
@@ -422,7 +543,10 @@ void render(void)
 	}
 	else if(inGame)
 	{
+	extern void render_fighters(int walkFrame,int cy, int cx, Vec pos);
+	extern void init_fighters();
     	Rect r;
+	int ix,iy,tx,ty;
 	//Clear the screen
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -451,6 +575,9 @@ void render(void)
 		glEnd();
 		glPopMatrix();
 	}
+	init_fighters();
+	//render_fighters(g.walkFrame,cy,cx,player.pos);
+
 	float h = 200.0;
 	float w = h * 0.5;
 	glPushMatrix();
@@ -476,7 +603,7 @@ void render(void)
 	glPopMatrix();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_ALPHA_TEST);
-	//
+	
 	unsigned int c = 0x00ffff44;
 
 	//Show Credits

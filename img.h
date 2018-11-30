@@ -1,6 +1,15 @@
 //Image Header file/ Declaration
 //
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <math.h>
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <GL/glx.h>
+#include </usr/include/AL/alut.h>
+#include "fonts.h"
 
 class Image {
 public:
@@ -46,10 +55,5 @@ public:
                 unlink(ppmname);
         }
 };
-Image img[4] = {
-    "./images/Kang-Walk.gif",
-    "./images/dog.jpg",
-    "./images/bunny.png",
-    "./images/MainMenu.png",
-};
 
+unsigned char *buildAlphaData(Image *img);
