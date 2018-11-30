@@ -78,10 +78,12 @@ public:
                 unlink(ppmname); 
         } 
 }; 
-Image img[3] = { 
+Image img[5] = { 
     "./images/Kang-Walk.gif", 
     "./images/dog.jpg", 
-    "./images/bunny.png", 
+    "./images/bunny.png",
+   "./images/MainMenu.png",
+   "./images/Tutorial.jfif", 
 }; 
 //--------------------------------------------------------------------------------------------
 
@@ -101,6 +103,7 @@ public:
         GLuint sergioTexture;
         GLuint guadalupeTexture;
         GLuint MainMenuTexture;
+	GLuint TutorialTexture;
         Vec box[20];
         Global() {
                 done=0;

@@ -46,9 +46,10 @@ public:
                 unlink(ppmname);
         }
 };
-Image img[3] = {
+Image img[4] = {
     "./images/Kang-Walk.gif",
     "./images/dog.jpg",
     "./images/bunny.png",
+    "./images/MainMenu.png",
 };
 

@@ -47,7 +47,9 @@ class Player {
 
 //external function prototypes
 extern void showMainMenu(int,int,GLuint);
+extern void tutorial(int,int,GLuint);
 extern bool inMainMenu;
+extern bool inTutorial;
 extern bool inGame;
 //function prototypes
 void initOpengl(void);
@@ -161,13 +163,15 @@ void initOpengl(void)
 	int h3 = img[2].height;
 	int w4 = img[3].width;
 	int h4 = img[3].height;
+	int w5 = img[4].width;
+	int h5 = img[4].height;
 	//
 	//create opengl texture elements
 	glGenTextures(1, &g.walkTexture);
 	glGenTextures(1, &g.sergioTexture);
 	glGenTextures(1, &g.guadalupeTexture);
 	glGenTextures(1, &g.MainMenuTexture);
-
+	glGenTextures(1, &g.TutorialTexture);
 
 	//-------------------------------------------------------------------------
 	//silhouette
@@ -215,9 +219,17 @@ void initOpengl(void)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexImage2D(GL_TEXTURE_2D, 0, 3, w4, h4, 0,
                 GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
-//        unsigned char *mainData = buildAlphaData(&img[3]);
-  //      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w4, h4, 0,
-    //            GL_RGBA, GL_UNSIGNED_BYTE, mainData);	
+        //unsigned char *mainData = buildAlphaData(&img[3]);
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w4, h4, 0,
+          //      GL_RGBA, GL_UNSIGNED_BYTE, mainData);
+
+	  //Main Menu Picture
+        glBindTexture(GL_TEXTURE_2D, g.TutorialTexture);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, w5, h5, 0,
+                GL_RGB, GL_UNSIGNED_BYTE, img[4].data);	
 }
 
 void init() {
@@ -279,6 +291,10 @@ int checkKeys(XEvent *e)
 				    inGame = true;
 				    inMainMenu = false;	    
 				}
+				if(selected == 2) {
+					inMainMenu = false;
+					inTutorial = true;
+				}
 				//printf("Return entered!! \n");
 				break;
 		    	case XK_Up:
@@ -297,6 +313,17 @@ int checkKeys(XEvent *e)
 				break;
 		}
 	}
+	if (inTutorial) {
+		switch (key) {
+			case XK_q:
+				if (selected == 2) {
+					inTutorial = false;
+					inMainMenu = true;
+					break;
+				}
+		}
+	}
+					
 	if (inGame) {	
 		switch (key) {
 			case XK_w:
@@ -382,12 +409,16 @@ void physics(void)
 
 void render(void)
 {
-	printf("ingame = %d\n",inGame);
-	printf("inMain = %d\n",inMainMenu);
+	//printf("ingame = %d\n",inGame);
+	//printf("inMain = %d\n",inMainMenu);
     	if(inMainMenu) { 
 	    showMainMenu(g.xres, g.yres,g.MainMenuTexture);
 		    
 
+	}
+	else if (inTutorial) 
+	{
+		tutorial(g.xres,g.yres,g.TutorialTexture);
 	}
 	else if(inGame)
 	{
@@ -496,7 +527,6 @@ void render(void)
 	ggprint8b(&r, 16, c, "frame: %i", g.walkFrame);
 }
 }
-
 
 
 
