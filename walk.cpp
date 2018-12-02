@@ -12,11 +12,13 @@
 #include "img.h"
 
 
-Image img[4] = {
+Image img[6] = {
     "./images/Kang-Walk.gif",
     "./images/dog.jpg",
     "./images/bunny.png",
     "./images/MainMenu.png",
+    "./images/Tutorial.jpg",
+    "./images/pause.jpg",
 };
 
 unsigned char *buildAlphaData(Image *img) {
@@ -63,6 +65,7 @@ public:
         GLuint guadalupeTexture;
         GLuint MainMenuTexture;
 	GLuint TutorialTexture;
+	GLuint PauseMenuTexture;
         Vec box[20];
         Global() {
                 done=0;
@@ -198,9 +201,12 @@ class Player {
 //external function prototypes
 extern void showMainMenu(int,int,GLuint);
 extern void tutorial(int,int,GLuint);
+extern void PauseMenu(int, int, GLuint);
 extern bool inMainMenu;
 extern bool inTutorial;
 extern bool inGame;
+extern bool inPauseMenu;
+
 //function prototypes
 void initOpengl(void);
 void checkMouse(XEvent *e);
@@ -286,6 +292,8 @@ void initOpengl(void)
 	int h4 = img[3].height;
 	int w5 = img[4].width;
 	int h5 = img[4].height;
+	int w6 = img[5].width;
+	int h6 = img[5].height;
 	//
 	//create opengl texture elements
 	glGenTextures(1, &g.walkTexture);
@@ -293,6 +301,7 @@ void initOpengl(void)
 	glGenTextures(1, &g.guadalupeTexture);
 	glGenTextures(1, &g.MainMenuTexture);
 	glGenTextures(1, &g.TutorialTexture);
+	glGenTextures(1, &g.PauseMenuTexture);
 
 	//-------------------------------------------------------------------------
 	//silhouette
@@ -344,13 +353,21 @@ void initOpengl(void)
         //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w4, h4, 0,
           //      GL_RGBA, GL_UNSIGNED_BYTE, mainData);
 
-	  //Main Menu Picture
+	  //Tutorial Picture
         glBindTexture(GL_TEXTURE_2D, g.TutorialTexture);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexImage2D(GL_TEXTURE_2D, 0, 3, w5, h5, 0,
-                GL_RGB, GL_UNSIGNED_BYTE, img[4].data);	
+                GL_RGB, GL_UNSIGNED_BYTE, img[4].data);
+	
+	        //Pause Menu Picture
+        glBindTexture(GL_TEXTURE_2D, g.PauseMenuTexture);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, w6, h6, 0,
+                GL_RGB, GL_UNSIGNED_BYTE, img[5].data);	
 }
 
 void init() {
@@ -444,6 +461,33 @@ int checkKeys(XEvent *e)
 				}
 		}
 	}
+	   if (inPauseMenu) {
+
+                switch (key) {
+                        case XK_Return:
+                                if(selected == 1) {
+                                        inPauseMenu = false;
+                                        inGame = true;
+                                        break;
+                                }
+                                if(selected ==2) {
+                                        inPauseMenu = false;
+                                        inTutorial = true;
+                                }
+                        case XK_Up:
+                                if (selected == 1)
+                                    selected = 1;
+                                else
+                                    selected--;
+                                break;
+                        case XK_Down:
+                                if (selected == 2)
+                                    selected = 2;
+                                else
+                                selected++;
+
+                                }
+                                }
 					
 	if (inGame) {	
 		switch (key) {
@@ -541,6 +585,10 @@ void render(void)
 	{
 		tutorial(g.xres,g.yres,g.TutorialTexture);
 	}
+	else if (inPauseMenu)
+        {
+                PauseMenu(g.xres, g.yres,g.PauseMenuTexture);
+        }
 	else if(inGame)
 	{
 	extern void render_fighters(int walkFrame,int cy, int cx, Vec pos);
