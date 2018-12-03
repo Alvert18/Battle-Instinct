@@ -594,7 +594,7 @@ void render(void)
 	extern void render_fighters(int walkFrame,int cy, int cx, Vec pos);
 	extern void init_fighters();
     	Rect r;
-	int ix,iy,tx,ty;
+	//int ix,iy,tx,ty;
 	//Clear the screen
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
