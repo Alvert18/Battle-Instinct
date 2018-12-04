@@ -709,8 +709,9 @@ int checkKeys(XEvent *e)
 		    selected--;
 		break;
 	    case XK_Down:
-		if (selected == 2)
-		    selected = 2;
+		if (selected == 3)
+		    selected = 3;
+
 		else
 		    selected++;
 
