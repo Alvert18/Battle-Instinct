@@ -127,7 +127,7 @@ void tutorial (int x, int y, GLuint TutorialTexture)
     float w = x;
     float h = y;
     glPushMatrix();
-    glTranslatef(800, 600, 0);
+    glTranslatef(400, 400, 0);
     glBindTexture(GL_TEXTURE_2D, TutorialTexture);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0f);

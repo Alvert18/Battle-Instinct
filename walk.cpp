@@ -983,8 +983,9 @@ int checkKeys(XEvent *e)
 		    break;
 		case XK_Escape:
 			inGame = false;
+			inMainMenu=false;
 			inPauseMenu = true;
-		    return 1;
+		    //return 1;
 		    break;
 		default:
 		    g.walk = 0;
@@ -1460,7 +1461,7 @@ void render(void)
     }
     else if (inPauseMenu)
     {
-	PauseMenu(g.xres, g.yres,g.PauseMenuTexture);
+	PauseMenu(g.xres, g.yres,g.TutorialTexture);
     }
     else if(inGame)
     {
