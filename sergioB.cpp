@@ -93,6 +93,8 @@ void showMainMenu(int x, int y, GLuint MainMenuTexture)
     r.center = 0;
     ggprint12(&r, 20, c, "Start");
     ggprint12(&r, 20, c, "Tutorial");
+    ggprint12(&r, 20, c, "Exit");
+
 
     Rect r2;
     r2.bot = y - 400;
@@ -108,6 +110,13 @@ void showMainMenu(int x, int y, GLuint MainMenuTexture)
         py = y - 407;	
 	ggprint12(&r2, 20, 0xFF0000, " ");
 	ggprint12(&r2, 20, 0xFF0000, "Tutorial");
+    }
+    else if (selected ==3) {
+	px = x/2 - 73;
+	px = y - 390;
+	ggprint12(&r2, 20, 0xFF0000, " ");
+	ggprint12(&r2, 20, 0xFF0000, " ");
+	ggprint12(&r2, 20, 0xFF0000, "Exit");
     }
 
 }
@@ -138,18 +147,17 @@ void tutorial (int x, int y, GLuint TutorialTexture)
     ggprint12(&m, 16, 0xff0000, "MAIN GOAL");
     ggprint12(&m, 16, 0xff0000, "");
     ggprint12(&m, 16, 0xff0000, "");
-    ggprint12(&m, 16, 0xff0000, "See how long you can last.");
+    ggprint12(&m, 16, 0xff0000, "Fight to the death");
 
     Rect m2;
     m2.bot = y - 150;
     m2.left = x/10;
     m2.center = 0;
     ggprint12(&m2, 16, 0xff0000, "Controls:");
-    ggprint12(&m2, 16, 0xff0000, "w - moves up");
-    ggprint12(&m2, 16, 0xff0000, "s - moves down");
     ggprint12(&m2, 16, 0xff0000, "a - moves left");
     ggprint12(&m2, 16, 0xff0000, "d - moves right");
-    ggprint12(&m2, 16, 0xff0000, "q - quit back to menu");
+    ggprint12(&m2, 16, 0xff0000, "e - light attack");
+    ggprint12(&m2, 16, 0xff0000, "z - strong attack");
     ggprint12(&m2, 16, 0xff0000, "ESC - pause game");
 
 }
