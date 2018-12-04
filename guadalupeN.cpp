@@ -1,5 +1,5 @@
 //Name: Guadalupe Nunez
-//Date: October 02, 2018
+//Date: December 03, 2018
 //Individual File
 #include <iostream>
 #include <cstdlib>
@@ -16,6 +16,31 @@
 #include "fonts.h"
 
 using namespace std;
+class Timer {
+    public:
+    unsigned int sec;
+    unsigned int milisec;
+    unsigned int total;
+    unsigned countDown;
+    
+    int startTime;
+    int countTime;
+    int downTime;
+    Timer() {
+    sec = 0;
+    total = 0;
+    countDown = 0;
+    
+    startTime = 100;
+    countTime = 0;
+    downTime = 100;
+    Rect r;
+    c = 0x0027c1ee;
+    r.bot = y-50;
+    r.left = x-900;
+    r.center = 0;
+    }
+}time
 
 void showLupeName(int x, int y)
 {
@@ -49,5 +74,65 @@ void showLupePicture(int x, int y, GLuint texid)
     glPopMatrix();
     return;
 }
+
+void showHealth(int x, int y)
+{
+    Rect r;
+    unsigned int c = 0x0027c1ee;
+    r.bot = y-30;
+    r.left = x-780;
+    r.center = 0;
+
+    int player1hp = 100;
+    int player2hp = 100;
+    int damage = 0;
+
+
+    if(player1hp == 0) {
+        ggprint8b(&r, 20, c, "Player 1 HP = %d", player1hp);
+        ggprint8b(&r, 20, c, "Player 2 HP = %d", player2hp);
+        ggprint8b(&r, 20, c, "PLAYER 2 WINS!!");
+    }
+    else if (player2hp == 0) {
+        ggprint8b(&r, 20, c, "Player 1 HP = %d", player1hp);
+        ggprint8b(&r, 20, c, "Player 2 HP = %d", player2hp);
+        ggprint8b(&r, 20, c, "PLAYER 1 WINS!!");
+    }
+    else {
+        ggprint8b(&r, 20, c, "Player 1 HP = %d", player1hp);
+        ggprint8b(&r, 20, c, "Player 2 HP = %d", player2hp);
+        ggprint8b(&r, 20, c, "Damage... %d", damage);
+    } 
+}
+
+void showTimer(int x, int y,int timeLeft)
+{
+    if (timeLeft !=0) {
+        if (timeLeft == 100) {
+
+        
+
+    time.startTime = clock();
+    timeLeft = time.downTime - time.sec;
+        }
+
+    //while (timeLeft > 0) {
+       time.countTime = clock();
+        time.milisec = time.countTime - time.startTime;
+        time.sec = (time.milisec/(CLOCKS_PER_SEC));
+        if(timeLeft!= time.downTime - time.sec) {
+            timeLeft = time.downTime - time.sec;
+            ggprint8b(&time.r, 20, time.c, "Remaining time: %d\n", timeLeft);
+        }
+
+       // continue;
+   // }
+    }
+   if(timeLeft = 0) 
+       ggprint8b(&r, 20, c, "TIME'S OUT!");
+
+    return;
+}
+
 
 
