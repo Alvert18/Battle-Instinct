@@ -191,6 +191,7 @@ void PauseMenu(int x, int y, GLuint PauseMenuTexture)
     r.center = 0;
     ggprint12(&r, 20, c, "Resume Game");
     ggprint12(&r, 20, c, "Tutorial");
+    ggprint12(&r, 20, c, "Exit");
 
     Rect r2;
     r2.bot = y - 400;
@@ -206,6 +207,13 @@ void PauseMenu(int x, int y, GLuint PauseMenuTexture)
         py = y - 407;
         ggprint12(&r2, 20, 0xFF0000, " ");
         ggprint12(&r2, 20, 0xFF0000, "Tutorial");
+    } else if (selected ==3) {
+        px = x/2 - 73;
+        px = y - 390;
+        ggprint12(&r2, 20, 0xFF0000, " ");
+        ggprint12(&r2, 20, 0xFF0000, " ");
+        ggprint12(&r2, 20, 0xFF0000, "Exit");
     }
+
 
 }
