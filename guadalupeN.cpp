@@ -16,7 +16,6 @@
 #include "fonts.h"
 
 using namespace std;
-<<<<<<< HEAD
 /*
 =======
 >>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
@@ -47,9 +46,6 @@ class Timer {
 }time
 <<<<<<< HEAD
 */
-=======
-
->>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
 void showLupeName(int x, int y)
 {
 	Rect r;
@@ -112,7 +108,7 @@ void showHealth(int x, int y)
         ggprint8b(&r, 20, c, "Damage... %d", damage);
     } 
 }
-<<<<<<< HEAD
+//<<<<<<< HEAD
 /*
 =======
 
@@ -161,8 +157,8 @@ void showTimer(int x, int y,int timeLeft)
 }
 <<<<<<< HEAD
 */
-=======
+//=======
 
->>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
+//>>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
 
 
