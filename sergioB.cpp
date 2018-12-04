@@ -33,7 +33,7 @@ void showSergioPicture(int x, int y, GLuint texid)
     int wid=40;
     static float fx = 0.0f;
     static float angle = 0.0f;
-    static float angle2 = 0.0f;
+    //static float angle2 = 0.0f;
 
     angle += 0.2;
     fx = sin(angle);
@@ -67,12 +67,12 @@ bool inPauseMenu = false;
 void showMainMenu(int x, int y, GLuint MainMenuTexture) 
 {
 
-    int px, py;
+    //int px, py;
 
     float w = x;
     float h = y;
     glPushMatrix();
-    glTranslatef(800, 600, 0);
+    glTranslatef(400, 400, 0);
     glBindTexture(GL_TEXTURE_2D, MainMenuTexture);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0f);
@@ -93,6 +93,8 @@ void showMainMenu(int x, int y, GLuint MainMenuTexture)
     r.center = 0;
     ggprint12(&r, 20, c, "Start");
     ggprint12(&r, 20, c, "Tutorial");
+    ggprint12(&r, 20, c, "Exit");
+
 
     Rect r2;
     r2.bot = y - 400;
@@ -100,14 +102,21 @@ void showMainMenu(int x, int y, GLuint MainMenuTexture)
     r2.center = 0;
 
     if (selected == 1) {
-	px = x/2 - 73;
-	py = y - 390;
+	//px = x/2 - 73;
+	//py = y - 390;
 	ggprint12(&r2, 20, 0xFF0000, "Start");
     } else if (selected == 2) {
-	px = x/2 - 73;
-        py = y - 407;	
+	//px = x/2 - 73;
+        //py = y - 407;	
 	ggprint12(&r2, 20, 0xFF0000, " ");
 	ggprint12(&r2, 20, 0xFF0000, "Tutorial");
+    }
+    else if (selected ==3) {
+	//px = x/2 - 73;
+	//px = y - 390;
+	ggprint12(&r2, 20, 0xFF0000, " ");
+	ggprint12(&r2, 20, 0xFF0000, " ");
+	ggprint12(&r2, 20, 0xFF0000, "Exit");
     }
 
 }
@@ -138,18 +147,17 @@ void tutorial (int x, int y, GLuint TutorialTexture)
     ggprint12(&m, 16, 0xff0000, "MAIN GOAL");
     ggprint12(&m, 16, 0xff0000, "");
     ggprint12(&m, 16, 0xff0000, "");
-    ggprint12(&m, 16, 0xff0000, "See how long you can last.");
+    ggprint12(&m, 16, 0xff0000, "Fight to the death");
 
     Rect m2;
     m2.bot = y - 150;
     m2.left = x/10;
     m2.center = 0;
     ggprint12(&m2, 16, 0xff0000, "Controls:");
-    ggprint12(&m2, 16, 0xff0000, "w - moves up");
-    ggprint12(&m2, 16, 0xff0000, "s - moves down");
     ggprint12(&m2, 16, 0xff0000, "a - moves left");
     ggprint12(&m2, 16, 0xff0000, "d - moves right");
-    ggprint12(&m2, 16, 0xff0000, "q - quit back to menu");
+    ggprint12(&m2, 16, 0xff0000, "e - light attack");
+    ggprint12(&m2, 16, 0xff0000, "z - strong attack");
     ggprint12(&m2, 16, 0xff0000, "ESC - pause game");
 
 }
@@ -157,7 +165,7 @@ void tutorial (int x, int y, GLuint TutorialTexture)
 void PauseMenu(int x, int y, GLuint PauseMenuTexture)
 {
 
-    int px, py;
+   // int px, py;
 
     float w = x;
     float h = y;
@@ -183,6 +191,7 @@ void PauseMenu(int x, int y, GLuint PauseMenuTexture)
     r.center = 0;
     ggprint12(&r, 20, c, "Resume Game");
     ggprint12(&r, 20, c, "Tutorial");
+    ggprint12(&r, 20, c, "Exit");
 
     Rect r2;
     r2.bot = y - 400;
@@ -190,14 +199,21 @@ void PauseMenu(int x, int y, GLuint PauseMenuTexture)
     r2.center = 0;
 
     if (selected == 1) {
-        px = x/2 - 73;
-        py = y - 390;
+     //   px = x/2 - 73;
+      //  py = y - 390;
         ggprint12(&r2, 20, 0xFF0000, "Resume Game");
     } else if (selected == 2) {
-        px = x/2 - 73;
-        py = y - 407;
+      //  px = x/2 - 73;
+      //  py = y - 407;
         ggprint12(&r2, 20, 0xFF0000, " ");
         ggprint12(&r2, 20, 0xFF0000, "Tutorial");
+    } else if (selected ==3) {
+       // px = x/2 - 73;
+       // px = y - 390;
+        ggprint12(&r2, 20, 0xFF0000, " ");
+        ggprint12(&r2, 20, 0xFF0000, " ");
+        ggprint12(&r2, 20, 0xFF0000, "Exit");
     }
+
 
 }
