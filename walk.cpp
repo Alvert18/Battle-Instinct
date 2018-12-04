@@ -25,154 +25,181 @@ Image img[6] = {
 Image Stance = "./images/Sprites/Fighter_stance.png";
 Image Walk = "./images/Sprites/Fighter_walk.png";
 Image Crouch = "./images/Sprites/Fighter_crouch.png";
+Image Jump = "./images/Sprites/Fighter_jump.png";
+Image Light_Punch = "./images/Sprites/Fighter_light-punch.png";
+Image Light_Kick = "./images/Sprites/Fighter_light-kick.png";
+Image Strong_Punch = "./images/Sprites/Fighter_strong-punch.png";
+Image Strong_Kick = "./images/Sprites/Fighter_strong-kick.png";
+Image Crouch_Kick = "./images/Sprites/Fighter_crouch-kick.png";
+Image Crouch_Punch = "./images/Sprites/Fighter_crouch-punch.png";
 
 unsigned char *buildAlphaData(Image *img) {
-	//add 4th component to RGB stream...
-	int i;
-	unsigned char *newdata, *ptr;
-	unsigned char *data = (unsigned char *)img->data;
-	newdata = (unsigned char *)malloc(img->width * img->height * 4);
-	ptr = newdata;
-	unsigned char a,b,c;
-	//use the first pixel in the image as the transparent color.
-	unsigned char t0 = *(data+0);
-	unsigned char t1 = *(data+1);
-	unsigned char t2 = *(data+2);
-	for (i=0; i<img->width * img->height * 3; i+=3) {
-		a = *(data+0);
-		b = *(data+1);
-		c = *(data+2);
-		*(ptr+0) = a;
-		*(ptr+1) = b;
-		*(ptr+2) = c;
-		*(ptr+3) = 1;
-		if (a==t0 && b==t1 && c==t2)
-			*(ptr+3) = 0;
-		//-----------------------------------------------
-		ptr += 4;
-		data += 3;
-	}
-	return newdata;
+    //add 4th component to RGB stream...
+    int i;
+    unsigned char *newdata, *ptr;
+    unsigned char *data = (unsigned char *)img->data;
+    newdata = (unsigned char *)malloc(img->width * img->height * 4);
+    ptr = newdata;
+    unsigned char a,b,c;
+    //use the first pixel in the image as the transparent color.
+    unsigned char t0 = *(data+0);
+    unsigned char t1 = *(data+1);
+    unsigned char t2 = *(data+2);
+    for (i=0; i<img->width * img->height * 3; i+=3) {
+        a = *(data+0);
+        b = *(data+1);
+        c = *(data+2);
+        *(ptr+0) = a;
+        *(ptr+1) = b;
+        *(ptr+2) = c;
+        *(ptr+3) = 1;
+        if (a==t0 && b==t1 && c==t2)
+            *(ptr+3) = 0;
+        //-----------------------------------------------
+        ptr += 4;
+        data += 3;
+    }
+    return newdata;
 }
 class Global {
-public:
+    public:
         int done;
         float fx;
         int xres, yres;
         int walk;
         int stand;
         int crouch;
+        int jump;
+        int light_punch;
+        int light_kick;
+        int strong_punch;
+        int strong_kick;
+        int crouch_punch;
+        int crouch_kick;
         bool credits = false;
         int walkFrame;
         double delay;
         //Booleans
-//      bool inMainMenu = true;
-//      bool inGame = false;
+        //      bool inMainMenu = true;
+        //      bool inGame = false;
         GLuint walkTexture;
         GLuint sergioTexture;
         GLuint guadalupeTexture;
         GLuint MainMenuTexture;
-	GLuint TutorialTexture;
-	GLuint PauseMenuTexture;
-    GLuint stanceTexture;
-   // GLuint walkTexture;
-    GLuint crouchTexture;
+        GLuint TutorialTexture;
+        GLuint PauseMenuTexture;
+        GLuint stanceTexture;
+        GLuint crouchTexture;
+        GLuint jumpTexture;
+        GLuint strong_kickTexture;
+        GLuint strong_punchTexture;
+        GLuint light_punchTexture;
+        GLuint light_kickTexture;
+        GLuint crouch_kickTexture;
+        GLuint crouch_punchTexture;
         Vec box[20];
         Global() {
-                done=0;
-                xres=800;
-                yres=600;
-                walk=0;
-                fx = .18;
-                stand=1;
-                crouch=0;
-                walkFrame=0;
-                delay = 0.1;
-                for (int i=0; i<20; i++) {
-                        box[i][0] = rnd() * xres;
-                        box[i][1] = rnd() * (yres-220) + 220.0;
-                        box[i][2] = 0.0;
-                }
+            done=0;
+            xres=800;
+            yres=600;
+            walk=0;
+            fx = .18;
+            stand=1;
+            crouch=0;
+            jump=0;
+            light_punch=0;
+            light_kick=0;
+            strong_punch=0;
+            strong_kick=0;
+            crouch_kick=0;
+            crouch_punch=0;
+            walkFrame=0;
+            delay = .28;
+            for (int i=0; i<20; i++) {
+                box[i][0] = rnd() * xres;
+                box[i][1] = rnd() * (yres-220) + 220.0;
+                box[i][2] = 0.0;
+            }
         }
 } g;
 
 //--------------------------------------------------------------------------------------------
 
 class X11_wrapper {
-private:
+    private:
         Display *dpy;
         Window win;
-public:
+    public:
         X11_wrapper() {
-                GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-                //GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, None };
-                XSetWindowAttributes swa;
-                setupScreenRes(g.xres, g.yres);
-                dpy = XOpenDisplay(NULL);
-                if (dpy == NULL) {
-                        printf("\n\tcannot connect to X server\n\n");
-                        exit(EXIT_FAILURE);
-                }
-                Window root = DefaultRootWindow(dpy);
-                XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
-                if (vi == NULL) {
-                        printf("\n\tno appropriate visual found\n\n");
-                        exit(EXIT_FAILURE);
-                }
-                Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
-                swa.colormap = cmap;
-                swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
-                                                        StructureNotifyMask | SubstructureNotifyMask;
-                win = XCreateWindow(dpy, root, 0, 0, g.xres, g.yres, 0,
-                                                                vi->depth, InputOutput, vi->visual,
-                                                                CWColormap | CWEventMask, &swa);
-                GLXContext glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-                glXMakeCurrent(dpy, win, glc);
-                setTitle();
+            GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+            //GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, None };
+            XSetWindowAttributes swa;
+            setupScreenRes(g.xres, g.yres);
+            dpy = XOpenDisplay(NULL);
+            if (dpy == NULL) {
+                printf("\n\tcannot connect to X server\n\n");
+                exit(EXIT_FAILURE);
+            }
+            Window root = DefaultRootWindow(dpy);
+            XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
+            if (vi == NULL) {
+                printf("\n\tno appropriate visual found\n\n");
+                exit(EXIT_FAILURE);
+            }
+            Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
+            swa.colormap = cmap;
+            swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
+                StructureNotifyMask | SubstructureNotifyMask;
+            win = XCreateWindow(dpy, root, 0, 0, g.xres, g.yres, 0,
+                    vi->depth, InputOutput, vi->visual,
+                    CWColormap | CWEventMask, &swa);
+            GLXContext glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+            glXMakeCurrent(dpy, win, glc);
+            setTitle();
         }
         ~X11_wrapper() {
-                XDestroyWindow(dpy, win);
-                XCloseDisplay(dpy);
+            XDestroyWindow(dpy, win);
+            XCloseDisplay(dpy);
         }
         void setTitle() {
-                //Set the window title bar.
-                XMapWindow(dpy, win);
-                XStoreName(dpy, win, "Walk Cycle");
+            //Set the window title bar.
+            XMapWindow(dpy, win);
+            XStoreName(dpy, win, "Walk Cycle");
         }
         void setupScreenRes(const int w, const int h) {
-                g.xres = w;
-                g.yres = h;
+            g.xres = w;
+            g.yres = h;
         }
         void reshapeWindow(int width, int height) {
-                //window has been resized.
-                setupScreenRes(width, height);
-                glViewport(0, 0, (GLint)width, (GLint)height);
-                glMatrixMode(GL_PROJECTION); glLoadIdentity();
-                glMatrixMode(GL_MODELVIEW); glLoadIdentity();
-                glOrtho(0, g.xres, 0, g.yres, -1, 1);
-                setTitle();
+            //window has been resized.
+            setupScreenRes(width, height);
+            glViewport(0, 0, (GLint)width, (GLint)height);
+            glMatrixMode(GL_PROJECTION); glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+            glOrtho(0, g.xres, 0, g.yres, -1, 1);
+            setTitle();
         }
         void checkResize(XEvent *e) {
-                //The ConfigureNotify is sent by the
-                //server if the window is resized.
-                if (e->type != ConfigureNotify)
-                        return;
-                XConfigureEvent xce = e->xconfigure;
-                if (xce.width != g.xres || xce.height != g.yres) {
-                        //Window size did change.
-                        reshapeWindow(xce.width, xce.height);
-                }
+            //The ConfigureNotify is sent by the
+            //server if the window is resized.
+            if (e->type != ConfigureNotify)
+                return;
+            XConfigureEvent xce = e->xconfigure;
+            if (xce.width != g.xres || xce.height != g.yres) {
+                //Window size did change.
+                reshapeWindow(xce.width, xce.height);
+            }
         }
         bool getXPending() {
-                return XPending(dpy);
+            return XPending(dpy);
         }
         XEvent getXNextEvent() {
-                XEvent e;
-                XNextEvent(dpy, &e);
-                return e;
+            XEvent e;
+            XNextEvent(dpy, &e);
+            return e;
         }
         void swapBuffers() {
-                glXSwapBuffers(dpy, win);
+            glXSwapBuffers(dpy, win);
         }
 
 } x11;
@@ -180,25 +207,25 @@ public:
 //-----------------------------------------------------------------------------
 //Setup timers
 class Timers {
-public:
-	double physicsRate;
-	double oobillion;
-	struct timespec timeStart, timeEnd, timeCurrent;
-	struct timespec walkTime;
-	Timers() {
-		physicsRate = 1.0 / 30.0;
-		oobillion = 1.0 / 1e9;
-	}
-	double timeDiff(struct timespec *start, struct timespec *end) {
-		return (double)(end->tv_sec - start->tv_sec ) +
-				(double)(end->tv_nsec - start->tv_nsec) * oobillion;
-	}
-	void timeCopy(struct timespec *dest, struct timespec *source) {
-		memcpy(dest, source, sizeof(struct timespec));
-	}
-	void recordTime(struct timespec *t) {
-		clock_gettime(CLOCK_REALTIME, t);
-	}
+    public:
+        double physicsRate;
+        double oobillion;
+        struct timespec timeStart, timeEnd, timeCurrent;
+        struct timespec walkTime;
+        Timers() {
+            physicsRate = 1.0 / 30.0;
+            oobillion = 1.0 / 1e9;
+        }
+        double timeDiff(struct timespec *start, struct timespec *end) {
+            return (double)(end->tv_sec - start->tv_sec ) +
+                (double)(end->tv_nsec - start->tv_nsec) * oobillion;
+        }
+        void timeCopy(struct timespec *dest, struct timespec *source) {
+            memcpy(dest, source, sizeof(struct timespec));
+        }
+        void recordTime(struct timespec *t) {
+            clock_gettime(CLOCK_REALTIME, t);
+        }
 } timers;
 //-----------------------------------------------------------------------------
 
@@ -207,9 +234,9 @@ int selected = 1;
 
 class Player {
     public:
-	Vec pos;
-	Vec vel;
-	Vec lastpos;
+        Vec pos;
+        Vec vel;
+        Vec lastpos;
 }player;
 
 //external function prototypes
@@ -234,25 +261,25 @@ void show_credits();
 extern void init_fighters();
 int main(void)
 {
-	initOpengl();
-	init();
-	init_fighters();
-	int done = 0;
-	while (!done) {
-		while (x11.getXPending()) {
-			XEvent e = x11.getXNextEvent();
-			x11.checkResize(&e);
-			checkMouse(&e);
-			done = checkKeys(&e);
-		}
-		physics();
-		render();
-	//	showMainMenu(g.xres,g.yres);
-		//render();
-		x11.swapBuffers();
-	}
-	cleanup_fonts();
-	return 0;
+    initOpengl();
+    init();
+    init_fighters();
+    int done = 0;
+    while (!done) {
+        while (x11.getXPending()) {
+            XEvent e = x11.getXNextEvent();
+            x11.checkResize(&e);
+            checkMouse(&e);
+            done = checkKeys(&e);
+        }
+        physics();
+        render();
+        //	showMainMenu(g.xres,g.yres);
+        //render();
+        x11.swapBuffers();
+    }
+    cleanup_fonts();
+    return 0;
 }
 
 void show_credits()
@@ -269,159 +296,260 @@ void show_credits()
 
 void initOpengl(void)
 {
-	//OpenGL initialization
-	int w = img[0].width;
-	int h = img[0].height;
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-//		GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
+    //OpenGL initialization
+    int w = img[0].width;
+    int h = img[0].height;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+    //		GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
 
 
 
-	glViewport(0, 0, g.xres, g.yres);
-	//Initialize matrices
-	glMatrixMode(GL_PROJECTION); glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW); glLoadIdentity();
-	//This sets 2D mode (no perspective)
-	glOrtho(0, g.xres, 0, g.yres, -1, 1);
-	//
-	glDisable(GL_LIGHTING);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_FOG);
-	glDisable(GL_CULL_FACE);
-	//
-	//Clear the screen
-	glClearColor(1.0, 1.0, 1.0, 1.0);
-	//glClear(GL_COLOR_BUFFER_BIT);
-	//Do this to allow fonts
-	glEnable(GL_TEXTURE_2D);
-	initialize_fonts();
-	//
-	//load the images file into a ppm structure.
-	//
-	int w2 = img[1].width;
-	int h2 = img[1].height;
-	int w3 = img[2].width;
-	int h3 = img[2].height;
-	int w4 = img[3].width;
-	int h4 = img[3].height;
-	int w5 = img[4].width;
-	int h5 = img[4].height;
-	int w6 = img[5].width;
-	int h6 = img[5].height;
-	//
-	//create opengl texture elements
-	glGenTextures(1, &g.walkTexture);
-	glGenTextures(1, &g.sergioTexture);
-	glGenTextures(1, &g.guadalupeTexture);
-	glGenTextures(1, &g.MainMenuTexture);
-	glGenTextures(1, &g.TutorialTexture);
-	glGenTextures(1, &g.PauseMenuTexture);
+    glViewport(0, 0, g.xres, g.yres);
+    //Initialize matrices
+    glMatrixMode(GL_PROJECTION); glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+    //This sets 2D mode (no perspective)
+    glOrtho(0, g.xres, 0, g.yres, -1, 1);
+    //
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_FOG);
+    glDisable(GL_CULL_FACE);
+    //
+    //Clear the screen
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    //glClear(GL_COLOR_BUFFER_BIT);
+    //Do this to allow fonts
+    glEnable(GL_TEXTURE_2D);
+    initialize_fonts();
+    //
+    //load the images file into a ppm structure.
+    //
+    int w2 = img[1].width;
+    int h2 = img[1].height;
+    int w3 = img[2].width;
+    int h3 = img[2].height;
+    int w4 = img[3].width;
+    int h4 = img[3].height;
+    int w5 = img[4].width;
+    int h5 = img[4].height;
+    int w6 = img[5].width;
+    int h6 = img[5].height;
+    //
+    //create opengl texture elements
+    glGenTextures(1, &g.walkTexture);
+    glGenTextures(1, &g.sergioTexture);
+    glGenTextures(1, &g.guadalupeTexture);
+    glGenTextures(1, &g.MainMenuTexture);
+    glGenTextures(1, &g.TutorialTexture);
+    glGenTextures(1, &g.PauseMenuTexture);
     //Fighter Textures
     glGenTextures(1, &g.stanceTexture);
     //glGenTextures(1, &g.walkTexture);
     glGenTextures(1, &g.crouchTexture);
+    glGenTextures(1, &g.jumpTexture);
+    glGenTextures(1, &g.light_punchTexture);
+    glGenTextures(1, &g.light_kickTexture);
+    glGenTextures(1, &g.strong_punchTexture);
+    glGenTextures(1, &g.strong_kickTexture);
 
-	//-------------------------------------------------------------------------
-	//Dog picture
-	glBindTexture(GL_TEXTURE_2D, g.sergioTexture);
-	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w2, h2, 0,
-		GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
-	unsigned char *sergioData = buildAlphaData(&img[1]);	
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, sergioData);
-	//-------------------------------------------------------------------------
-	//Bunny picture
-	glBindTexture(GL_TEXTURE_2D, g.guadalupeTexture);
-	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
-		GL_RGB, GL_UNSIGNED_BYTE, img[2].data);
-	unsigned char *guadalupeData = buildAlphaData(&img[2]);	
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w3, h3, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, guadalupeData);
-	//------------------------------------------------------------------------
-	//Main Menu Picture
-	glBindTexture(GL_TEXTURE_2D, g.MainMenuTexture);
+    //-------------------------------------------------------------------------
+    //Dog picture
+    glBindTexture(GL_TEXTURE_2D, g.sergioTexture);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, w4, h4, 0,
-                GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
-        //unsigned char *mainData = buildAlphaData(&img[3]);
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w4, h4, 0,
-          //      GL_RGBA, GL_UNSIGNED_BYTE, mainData);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w2, h2, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
+    unsigned char *sergioData = buildAlphaData(&img[1]);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, sergioData);
+    //-------------------------------------------------------------------------
+    //Bunny picture
+    glBindTexture(GL_TEXTURE_2D, g.guadalupeTexture);
 
-	  //Tutorial Picture
-        glBindTexture(GL_TEXTURE_2D, g.TutorialTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, img[2].data);
+    unsigned char *guadalupeData = buildAlphaData(&img[2]);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w3, h3, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, guadalupeData);
+    //------------------------------------------------------------------------
+    //Main Menu Picture
+    glBindTexture(GL_TEXTURE_2D, g.MainMenuTexture);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, w5, h5, 0,
-                GL_RGB, GL_UNSIGNED_BYTE, img[4].data);
-	
-	        //Pause Menu Picture
-        glBindTexture(GL_TEXTURE_2D, g.PauseMenuTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w4, h4, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+    //unsigned char *mainData = buildAlphaData(&img[3]);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w4, h4, 0,
+    //      GL_RGBA, GL_UNSIGNED_BYTE, mainData);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, w6, h6, 0,
-                GL_RGB, GL_UNSIGNED_BYTE, img[5].data);	
-	//-------------------------------------------------------------------------
-	//silhouette
-	//this is similar to a sprite graphic
-	//
-	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	//
-	//must build a new set of data...
-	unsigned char *walkData = buildAlphaData(&Walk);	
-	printf("h = %d \n w = %d",h,w);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Walk.width, Walk.height, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, walkData);
-	//free(walkData);
-	//unlink("./images/walk.ppm");
-	//-------------------------------------------------------------------------
-	//Stance
-	//this is similar to a sprite graphic
-	//
-	glBindTexture(GL_TEXTURE_2D, g.stanceTexture);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	//
-	//must build a new set of data...
-	unsigned char *stanceData = buildAlphaData(&Stance);	
-	printf("h = %d \n wS = %d",Stance.width,Stance.height);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Stance.width, Stance.height, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, stanceData);
-	//free(walkData);
-	//unlink("./images/walk.ppm");
-	//-------------------------------------------------------------------------
-	//-------------------------------------------------------------------------
-	//Crouch
-	//this is similar to a sprite graphic
-	//
-	glBindTexture(GL_TEXTURE_2D, g.crouchTexture);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	//
-	//must build a new set of data...
-	unsigned char *crouchData = buildAlphaData(&Crouch);	
-	printf("h crouch = %d  w = %d",Crouch.height,Crouch.width);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Crouch.width, Crouch.height, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, crouchData);
-	//free(walkData);
-	//unlink("./images/walk.ppm");
-	//-------------------------------------------------------------------------
+    //Tutorial Picture
+    glBindTexture(GL_TEXTURE_2D, g.TutorialTexture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w5, h5, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, img[4].data);
+
+    //Pause Menu Picture
+    glBindTexture(GL_TEXTURE_2D, g.PauseMenuTexture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w6, h6, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, img[5].data);	
+    //-------------------------------------------------------------------------
+    //silhouette
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, g.walkTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *walkData = buildAlphaData(&Walk);	
+    printf("h = %d \n w = %d",h,w);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Walk.width, Walk.height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, walkData);
+    //free(walkData);
+    //unlink("./images/walk.ppm");
+    //-------------------------------------------------------------------------
+    //Stance
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, g.stanceTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *stanceData = buildAlphaData(&Stance);	
+    printf("h = %d \n wS = %d",Stance.width,Stance.height);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Stance.width, Stance.height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, stanceData);
+    //free(walkData);
+    //unlink("./images/walk.ppm");
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //Crouch
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, g.crouchTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *crouchData = buildAlphaData(&Crouch);	
+    printf("h crouch = %d  w = %d",Crouch.height,Crouch.width);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Crouch.width, Crouch.height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, crouchData);
+    //free(walkData);
+    //unlink("./images/walk.ppm");
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //Jump
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, g.jumpTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *jumpData = buildAlphaData(&Jump);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Jump.width, Jump.height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, jumpData);
+    //free(walkData);
+    //unlink("./images/walk.ppm");
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //Light Punch
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, g.light_punchTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *lpunchData = buildAlphaData(&Light_Punch);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Light_Punch.width, Light_Punch.height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, lpunchData);
+    //free(walkData);
+    //unlink("./images/walk.ppm");
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //Light Kick
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, g.light_kickTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *lkickData = buildAlphaData(&Light_Kick);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Light_Kick.width, Light_Kick.height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, lkickData);
+    //free(walkData);
+    //unlink("./images/walk.ppm");
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //Strong Punch
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, g.strong_punchTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *spunchData = buildAlphaData(&Strong_Punch);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Strong_Punch.width, Strong_Punch.height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, spunchData);
+    //free(walkData);
+    //unlink("./images/walk.ppm");
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //Strong Kick
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, g.strong_kickTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *skickData = buildAlphaData(&Strong_Kick);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Strong_Kick.width, Strong_Kick.height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, skickData);
+    //free(walkData);
+    //unlink("./images/walk.ppm");
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //Crouch Kick
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, g.crouch_kickTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *ckickData = buildAlphaData(&Crouch_Kick);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Crouch_Kick.width, Crouch_Kick.height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, ckickData);
+    //free(walkData);
+    //unlink("./images/walk.ppm");
+    //-------------------------------------------------------------------------
 }
 
 void init() {
@@ -429,252 +557,459 @@ void init() {
     player.pos[1] = (double)(g.yres-200);
     MakeVector(6.0,0.0,0.0, player.vel);
     VecCopy(player.pos, player.lastpos);
-    
+
 }
 
 void checkMouse(XEvent *e)
 {
-	//Did the mouse move?
-	//Was a mouse button clicked?
-	static int savex = 0;
-	static int savey = 0;
-	//
-	if (e->type == ButtonRelease) {
-		return;
-	}
-	if (e->type == ButtonPress) {
-		if (e->xbutton.button==1) {
-			//Left button is down
-		}
-		if (e->xbutton.button==3) {
-			//Right button is down
-		}
-	}
-	if (savex != e->xbutton.x || savey != e->xbutton.y) {
-		//Mouse moved
-		savex = e->xbutton.x;
-		savey = e->xbutton.y;
-	}
+    //Did the mouse move?
+    //Was a mouse button clicked?
+    static int savex = 0;
+    static int savey = 0;
+    //
+    if (e->type == ButtonRelease) {
+        return;
+    }
+    if (e->type == ButtonPress) {
+        if (e->xbutton.button==1) {
+            //Left button is down
+        }
+        if (e->xbutton.button==3) {
+            //Right button is down
+        }
+    }
+    if (savex != e->xbutton.x || savey != e->xbutton.y) {
+        //Mouse moved
+        savex = e->xbutton.x;
+        savey = e->xbutton.y;
+    }
 }
 
 int checkKeys(XEvent *e)
 {
-	//keyboard input?
-	static int shift=0;
-	if (e->type != KeyRelease && e->type != KeyPress)
-		return 0;
-	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
-	if (e->type == KeyRelease) {
-		if (key == XK_Shift_L || key == XK_Shift_R)
-			shift = 0;
-		return 0;
-	}
-	if (key == XK_Shift_L || key == XK_Shift_R) {
-		shift=1;
-		return 0;
-	}
-	(void)shift;
+    //keyboard input?
+    static int shift=0;
+    if (e->type != KeyRelease && e->type != KeyPress)
+        return 0;
+    int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
+    if (e->type == KeyRelease) {
+        if (key == XK_Shift_L || key == XK_Shift_R)
+            shift = 0;
+        return 0;
+    }
+    if (key == XK_Shift_L || key == XK_Shift_R) {
+        shift=1;
+        return 0;
+    }
+    (void)shift;
 
-	if (inMainMenu) {
-		switch (key) {
+    if (inMainMenu) {
+        switch (key) {
 
-		    	case XK_Return: 
-			    	if(selected == 1) {
-				    inGame = true;
-				    inMainMenu = false;	    
-				}
-				if(selected == 2) {
-					inMainMenu = false;
-					inTutorial = true;
-				}
-				//printf("Return entered!! \n");
-				break;
-		    	case XK_Up:
-				if (selected == 1)
-				    selected = 1;
-				else
-				    selected--;
-			        printf("selected : %d\n",selected);
-				break;
-			case XK_Down:
-				if (selected == 2)
-				    selected = 2;
-				else	
-				selected++;
-			        printf("selected : %d\n",selected);
-				break;
-		}
-	}
-	if (inTutorial) {
-		switch (key) {
-			case XK_q:
-				if (selected == 2) {
-					inTutorial = false;
-					inMainMenu = true;
-					break;
-				}
-		}
-	}
-	   if (inPauseMenu) {
+            case XK_Return: 
+                if(selected == 1) {
+                    inGame = true;
+                    inMainMenu = false;	    
+                }
+                if(selected == 2) {
+                    inMainMenu = false;
+                    inTutorial = true;
+                }
+                //printf("Return entered!! \n");
+                break;
+            case XK_Up:
+                if (selected == 1)
+                    selected = 1;
+                else
+                    selected--;
+                printf("selected : %d\n",selected);
+                break;
+            case XK_Down:
+                if (selected == 2)
+                    selected = 2;
+                else	
+                    selected++;
+                printf("selected : %d\n",selected);
+                break;
+        }
+    }
+    if (inTutorial) {
+        switch (key) {
+            case XK_q:
+                if (selected == 2) {
+                    inTutorial = false;
+                    inMainMenu = true;
+                    break;
+                }
+        }
+    }
+    if (inPauseMenu) {
 
-                switch (key) {
-                        case XK_Return:
-                                if(selected == 1) {
-                                        inPauseMenu = false;
-                                        inGame = true;
-                                        break;
-                                }
-                                if(selected ==2) {
-                                        inPauseMenu = false;
-                                        inTutorial = true;
-                                }
-                        case XK_Up:
-                                if (selected == 1)
-                                    selected = 1;
-                                else
-                                    selected--;
-                                break;
-                        case XK_Down:
-                                if (selected == 2)
-                                    selected = 2;
-                                else
-                                selected++;
+        switch (key) {
+            case XK_Return:
+                if(selected == 1) {
+                    inPauseMenu = false;
+                    inGame = true;
+                    break;
+                }
+                if(selected ==2) {
+                    inPauseMenu = false;
+                    inTutorial = true;
+                }
+            case XK_Up:
+                if (selected == 1)
+                    selected = 1;
+                else
+                    selected--;
+                break;
+            case XK_Down:
+                if (selected == 2)
+                    selected = 2;
+                else
+                    selected++;
 
-                                }
-                                }
-					
-	if (inGame) {
-        if (e->type != KeyPress && ) {
+        }
+    }
+
+    if (inGame) {
+        if (e->type != KeyPress && e->type != KeyRelease) {
             printf ("KeyRelease!\n");
-			VecCopy(player.pos, player.lastpos);
-			g.walk = 0;
+            VecCopy(player.pos, player.lastpos);
+            g.walk = 0;
             g.crouch = 0;
             g.stand = 0;
         }
         else    
-		switch (key) {
-			case XK_w:
-				timers.recordTime(&timers.walkTime);
-				g.walk ^= 1;
-			break;
-		case XK_c:
-			if (g.credits == false)
-			    g.credits = true;
-			else
-			    g.credits = false;
-			break;
-		case XK_Left:
-			VecCopy(player.pos, player.lastpos);
-			player.pos[0] -= 10.0;
-			g.walk = 1;
-            g.crouch = 0;
-            g.stand = 0;
-			break;
-		case XK_Right:
-			VecCopy(player.pos, player.lastpos);
-			player.pos[0] += 10.0;
-			g.walk = 1;
-            g.crouch = 0;
-            g.stand = 0;
-			break;
-		case XK_Up:
-      //      g.fx = g.fx + 0.1;
-      //      printf("fx = %f\n",g.fx);
-			break;
-		case XK_Down:
-           // g.fx--;
-      //      g.fx = g.fx - 0.1;
-      //      printf("fx = %f\n",g.fx);
-			g.walk = 0;
-            g.crouch = 1;
-            g.stand = 0;
-			break;
-        case KeyRelease:
-            printf("KeyRelease!\n");
-			VecCopy(player.pos, player.lastpos);
-			g.walk = 0;
-            g.crouch = 0;
-            g.stand = 0;
-            break;
-            
-		case XK_equal:
-			g.delay -= 0.005;
-			if (g.delay < 0.005)
-				g.delay = 0.005;
-			break;
-		case XK_minus:
-			g.delay += 0.005;
-			break;
-		case XK_Escape:
-			return 1;
-			break;
-	}
-	}
-	return 0;
+            switch (key) {
+                case XK_w:
+                   // timers.recordTime(&timers.walkTime);
+                   // g.walk ^= 1;
+                    g.walk = 0;
+                    g.crouch = 0;
+                    g.stand = 0;
+                    g.jump = 1;
+                    g.light_punch=0;
+                    g.light_kick=0;
+                    g.strong_punch=0;
+                    g.strong_kick=0;
+                    break;
+                case XK_c:
+                /*    if (g.credits == false)
+                        g.credits = true;
+                    else
+                        g.credits = false;
+                        */
+                    //Light Kick
+                    g.walk = 0;
+                    g.crouch = 0;
+                    g.stand = 0;
+                    g.jump = 0;
+                    g.light_punch=0;
+                    g.light_kick=1;
+                    g.strong_punch=0;
+                    g.strong_kick=0;
+                    break;
+                case XK_e:
+                    //Light Punch
+                    g.walk = 0;
+                    g.crouch = 0;
+                    g.stand = 0;
+                    g.jump = 0;
+                    g.light_punch=1;
+                    g.light_kick=0;
+                    g.strong_punch=0;
+                    g.strong_kick=0;
+                    break;
+                case XK_q:
+                    //Strong Punch
+                    if (g.crouch == 1) {
+                        g.walk = 0;
+                        g.crouch = 1;
+                        g.stand = 0;
+                        g.jump = 0;
+                        g.light_punch=0;
+                        g.light_kick=0;
+                        g.strong_punch=1;
+                        g.strong_kick=0;
+                        g.crouch_kick=0;
+                        g.crouch_punch=1;
+                        break;
+                    }
+                    else{
+                        g.walk = 0;
+                        g.crouch = 0;
+                        g.stand = 0;
+                        g.jump = 0;
+                        g.light_punch=0;
+                        g.light_kick=0;
+                        g.strong_punch=1;
+                        g.strong_kick=0;
+                        break;
+                    }
+                case XK_z:
+                    //Strong Kick
+                    if (g.crouch == 1) {
+                        g.crouch_kick = 1;
+                        break;
+                    }
+                    g.walk = 0;
+                    g.crouch = 0;
+                    g.stand = 0;
+                    g.jump = 0;
+                    g.light_punch=0;
+                    g.light_kick=0;
+                    g.strong_punch=0;
+                    g.strong_kick=1;
+                    break;
+                case XK_s:
+                    //Crouch
+                    g.walk = 0;
+                    g.crouch = 1;
+                    g.stand = 0;
+                    g.jump = 0;
+                    g.light_punch=0;
+                    g.light_kick=0;
+                    g.strong_punch=0;
+                    g.strong_kick=0;
+                    break;
+                case XK_a:
+                    //Left
+                    VecCopy(player.pos, player.lastpos);
+                    player.pos[0] -= 10.0;
+                    g.walk = 1;
+                    g.crouch = 0;
+                    g.stand = 0;
+                    g.jump = 0;
+                    g.light_punch=0;
+                    g.light_kick=0;
+                    g.strong_punch=0;
+                    g.strong_kick=0;
+                    break;
+                case XK_d:
+                    //Right
+                    VecCopy(player.pos, player.lastpos);
+                    player.pos[0] += 10.0;
+                    g.walk = 1;
+                    g.crouch = 0;
+                    g.stand = 0;
+                    g.jump = 0;
+                    g.light_punch=0;
+                    g.light_kick=0;
+                    g.strong_punch=0;
+                    g.strong_kick=0;
+                    break;
+                case XK_Left:
+                    VecCopy(player.pos, player.lastpos);
+                    player.pos[0] -= 10.0;
+                    g.walk = 1;
+                    g.crouch = 0;
+                    g.stand = 0;
+                    break;
+                case XK_Right:
+                    VecCopy(player.pos, player.lastpos);
+                    player.pos[0] += 10.0;
+                    g.walk = 1;
+                    g.crouch = 0;
+                    g.stand = 0;
+                    break;
+                case XK_Up:
+                    g.fx = g.fx + 0.01;
+                    printf("fx = %f\n",g.fx);
+                    break;
+                case XK_Down:
+                    // g.fx--;
+                    g.fx = g.fx - 0.01;
+                    printf("fx = %f\n",g.fx);
+                    //  g.walk = 0;
+                    //  g.crouch = 1;
+                    //  g.stand = 0;
+                    break;
+                case KeyRelease:
+                    printf("KeyRelease!\n");
+                    VecCopy(player.pos, player.lastpos);
+                    g.walk = 0;
+                    g.crouch = 0;
+                    g.stand = 0;
+                    break;
+
+                case XK_equal:
+                    g.delay -= 0.005;
+                    if (g.delay < 0.005)
+                        g.delay = 0.005;
+                    printf("g.delay= %f\n",g.delay);
+                    break;
+                case XK_minus:
+                    g.delay += 0.005;
+                    printf("g.delay= %f\n",g.delay);
+                    break;
+                case XK_Escape:
+                    return 1;
+                    break;
+                default:
+                    g.walk = 0;
+                    g.crouch = 0;
+                    g.stand = 1;
+                    g.jump = 0;
+                    g.light_punch=0;
+                    g.light_kick=0;
+                    g.strong_punch=0;
+                    g.strong_kick=0;
+                    break;
+
+            }
+    }
+    return 0;
 }
 
 Flt VecNormalize(Vec vec)
 {
-	Flt len, tlen;
-	Flt xlen = vec[0];
-	Flt ylen = vec[1];
-	Flt zlen = vec[2];
-	len = xlen*xlen + ylen*ylen + zlen*zlen;
-	if (len == 0.0) {
-		MakeVector(0.0,0.0,1.0,vec);
-		return 1.0;
-	}
-	len = sqrt(len);
-	tlen = 1.0 / len;
-	vec[0] = xlen * tlen;
-	vec[1] = ylen * tlen;
-	vec[2] = zlen * tlen;
-	return(len);
+    Flt len, tlen;
+    Flt xlen = vec[0];
+    Flt ylen = vec[1];
+    Flt zlen = vec[2];
+    len = xlen*xlen + ylen*ylen + zlen*zlen;
+    if (len == 0.0) {
+        MakeVector(0.0,0.0,1.0,vec);
+        return 1.0;
+    }
+    len = sqrt(len);
+    tlen = 1.0 / len;
+    vec[0] = xlen * tlen;
+    vec[1] = ylen * tlen;
+    vec[2] = zlen * tlen;
+    return(len);
 }
 
 void physics(void)
 {
-	if (g.walk) {
-		//man is walking...
-		//when time is up, advance the frame.
-		timers.recordTime(&timers.timeCurrent);
-		double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
-		if (timeSpan > g.delay) {
-			//advance
-			++g.walkFrame;
-			if (g.walkFrame >= 5)
-				g.walkFrame -= 5;
-			timers.recordTime(&timers.walkTime);
-		}
-		for (int i=0; i<20; i++) {
-			g.box[i][0] -= 2.0 * (0.05 / g.delay);
-			if (g.box[i][0] < -10.0)
-				g.box[i][0] += g.xres + 10.0;
-		}
-	}
+    if (g.walk) {
+        //man is walking...
+        //when time is up, advance the frame.
+        timers.recordTime(&timers.timeCurrent);
+        double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+        if (timeSpan > g.delay) {
+            //advance
+            ++g.walkFrame;
+            if (g.walkFrame >= 5)
+                g.walkFrame -= 5;
+            timers.recordTime(&timers.walkTime);
+        }
+        for (int i=0; i<20; i++) {
+            g.box[i][0] -= 2.0 * (0.05 / g.delay);
+            if (g.box[i][0] < -10.0)
+                g.box[i][0] += g.xres + 10.0;
+        }
+    }
     if (g.stand) {
         //man is standing
-		timers.recordTime(&timers.timeCurrent);
-		double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
-		if (timeSpan > g.delay) {
-			//advance
-			++g.walkFrame;
-			if (g.walkFrame >= 4)
-				g.walkFrame -= 4;
-			timers.recordTime(&timers.walkTime);
-		}
+        timers.recordTime(&timers.timeCurrent);
+        double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+        if (timeSpan > g.delay) {
+            //advance
+            ++g.walkFrame;
+            if (g.walkFrame >= 4)
+                g.walkFrame -= 4;
+            timers.recordTime(&timers.walkTime);
+        }
     }
     if (g.crouch) {
         //man is standing
-		timers.recordTime(&timers.timeCurrent);
-		double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
-		if (timeSpan > g.delay) {
-			//advance
-			g.walkFrame = 1;
-			timers.recordTime(&timers.walkTime);
-		}
+        timers.recordTime(&timers.timeCurrent);
+        double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+        if (timeSpan > g.delay) {
+            //advance
+            g.walkFrame = 1;
+            timers.recordTime(&timers.walkTime);
+        }
     }
-    
+    if (g.jump) {
+        //man is jump
+        timers.recordTime(&timers.timeCurrent);
+        double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+        if (timeSpan > g.delay) {
+            //advance
+            ++g.walkFrame;
+            if (g.walkFrame >= 2)
+                g.walkFrame -= 2;
+            timers.recordTime(&timers.walkTime);
+        }
+    }
+    if (g.light_punch) {
+        //light punching
+        timers.recordTime(&timers.timeCurrent);
+        double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+        if (timeSpan > g.delay) {
+            //advance
+            ++g.walkFrame;
+            if (g.walkFrame >= 2)
+                g.walkFrame -= 2;
+            timers.recordTime(&timers.walkTime);
+        }
+    }
+    if (g.strong_punch) {
+        //strong punching
+        timers.recordTime(&timers.timeCurrent);
+        double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+        if (timeSpan > g.delay) {
+            //advance
+            ++g.walkFrame;
+            if (g.walkFrame >= 3)
+                g.walkFrame -= 3;
+            timers.recordTime(&timers.walkTime);
+        }
+    }
+    if (g.strong_kick) {
+        //strong kick
+        timers.recordTime(&timers.timeCurrent);
+        double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+        if (timeSpan > g.delay) {
+            //advance
+            ++g.walkFrame;
+            if (g.walkFrame >= 3)
+                g.walkFrame -= 3;
+            timers.recordTime(&timers.walkTime);
+        }
+    }
+    if (g.light_kick) {
+        //light punching
+        timers.recordTime(&timers.timeCurrent);
+        double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+        if (timeSpan > g.delay) {
+            //advance
+            ++g.walkFrame;
+            if (g.walkFrame >= 2)
+                g.walkFrame -= 2;
+            timers.recordTime(&timers.walkTime);
+        }
+    }
+    if (g.crouch_kick) {
+        //crouch kick
+        timers.recordTime(&timers.timeCurrent);
+        double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+        if (timeSpan > g.delay) {
+            //advance
+            ++g.walkFrame;
+            if (g.walkFrame >= 2)
+                g.walkFrame -= 2;
+            timers.recordTime(&timers.walkTime);
+        }
+    }
+    if (g.crouch_punch) {
+        //crouch kick
+        timers.recordTime(&timers.timeCurrent);
+        double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+        if (timeSpan > g.delay) {
+            //advance
+            ++g.walkFrame;
+            if (g.walkFrame >= 2)
+                g.walkFrame -= 2;
+            timers.recordTime(&timers.walkTime);
+        }
+    }
+
+
+    //
+
 }
 
 void renderFighter(float cx, float cy, float w, float h) {
@@ -755,6 +1090,196 @@ void renderFighter(float cx, float cy, float w, float h) {
         glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
         glTexCoord2f(tx+1, ty);    glVertex2i(cx+w, cy+h);
         glTexCoord2f(tx+1, ty+1); glVertex2i(cx+w, cy-h);
+        glEnd();
+        glPopMatrix();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_ALPHA_TEST);
+    }
+    /*  if (g.jump) {
+    //Fighter jump
+    glPushMatrix();
+    glTranslatef(player.pos[0],0,player.pos[2]);
+    glColor3f(1.0, 1.0, 1.0);
+    glBindTexture(GL_TEXTURE_2D, g.jumpTexture);
+    //
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.0f);
+    glColor4ub(255,255,255,255);
+    int ix = g.walkFrame % 2;
+    int iy = 0;
+    if (g.walkFrame >= 2)
+    iy = 1;
+    float tx = (float)ix / 2.0;
+    float ty = (float)iy / 1.0;
+    //printf("cx = %f\n cy = %f\n h = %f\n w = %f\n",cx,cy,h,w);
+    glBegin(GL_QUADS);
+    glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
+    glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
+    glTexCoord2f(tx+1, ty);    glVertex2i(cx+w, cy+h);
+    glTexCoord2f(tx+1, ty+1); glVertex2i(cx+w, cy-h);
+    glEnd();
+    glPopMatrix();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_ALPHA_TEST);
+    }
+    */
+    if (g.light_punch) {
+        //Fighter light punch
+        glPushMatrix();
+        glTranslatef(player.pos[0],0,player.pos[2]);
+        glColor3f(1.0, 1.0, 1.0);
+        glBindTexture(GL_TEXTURE_2D, g.light_punchTexture);
+        //
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
+        glColor4ub(255,255,255,255);
+        int ix = g.walkFrame % 2;
+        int iy = 0;
+        if (g.walkFrame >= 2)
+            iy = 1;
+        float tx = (float)ix / 2.0;
+        float ty = (float)iy / 1.0;
+        //printf("cx = %f\n cy = %f\n h = %f\n w = %f\n",cx,cy,h,w);
+        glBegin(GL_QUADS);
+        glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
+        glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
+        glTexCoord2f(tx+0.42, ty);    glVertex2i(cx+w, cy+h);
+        glTexCoord2f(tx+0.42, ty+1); glVertex2i(cx+w, cy-h);
+        glEnd();
+        glPopMatrix();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_ALPHA_TEST);
+    }
+    if (g.light_kick) {
+        //Fighter light kick
+        glPushMatrix();
+        glTranslatef(player.pos[0],0,player.pos[2]);
+        glColor3f(1.0, 1.0, 1.0);
+        glBindTexture(GL_TEXTURE_2D, g.light_kickTexture);
+        //
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
+        glColor4ub(255,255,255,255);
+        int ix = g.walkFrame % 2;
+        int iy = 0;
+        if (g.walkFrame >= 2)
+            iy = 1;
+        float tx = (float)ix / 2.0;
+        float ty = (float)iy / 1.0;
+        //printf("cx = %f\n cy = %f\n h = %f\n w = %f\n",cx,cy,h,w);
+        glBegin(GL_QUADS);
+        glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
+        glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
+        glTexCoord2f(tx+0.45, ty);    glVertex2i(cx+w, cy+h);
+        glTexCoord2f(tx+0.45, ty+1); glVertex2i(cx+w, cy-h);
+        glEnd();
+        glPopMatrix();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_ALPHA_TEST);
+    }
+    if (g.strong_kick) {
+        //Fighter strong kick
+        glPushMatrix();
+        glTranslatef(player.pos[0],0,player.pos[2]);
+        glColor3f(1.0, 1.0, 1.0);
+        glBindTexture(GL_TEXTURE_2D, g.strong_kickTexture);
+        //
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
+        glColor4ub(255,255,255,255);
+        int ix = g.walkFrame % 3;
+        int iy = 0;
+        if (g.walkFrame >= 3)
+            iy = 1;
+        float tx = (float)ix / 3.0;
+        float ty = (float)iy / 1.0;
+        //printf("cx = %f\n cy = %f\n h = %f\n w = %f\n",cx,cy,h,w);
+        glBegin(GL_QUADS);
+        glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
+        glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
+        glTexCoord2f(tx+0.31, ty);    glVertex2i(cx+w, cy+h);
+        glTexCoord2f(tx+0.31, ty+1); glVertex2i(cx+w, cy-h);
+        glEnd();
+        glPopMatrix();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_ALPHA_TEST);
+    }
+    if (g.strong_punch) {
+        //Fighter strong punch
+        glPushMatrix();
+        glTranslatef(player.pos[0],0,player.pos[2]);
+        glColor3f(1.0, 1.0, 1.0);
+        glBindTexture(GL_TEXTURE_2D, g.strong_punchTexture);
+        //
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
+        glColor4ub(255,255,255,255);
+        int ix = g.walkFrame % 3;
+        int iy = 0;
+        if (g.walkFrame >= 3)
+            iy = 1;
+        float tx = (float)ix / 3.0;
+        float ty = (float)iy / 1.0;
+        //printf("cx = %f\n cy = %f\n h = %f\n w = %f\n",cx,cy,h,w);
+        glBegin(GL_QUADS);
+        glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
+        glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
+        glTexCoord2f(tx+0.27, ty);    glVertex2i(cx+w, cy+h);
+        glTexCoord2f(tx+0.27, ty+1); glVertex2i(cx+w, cy-h);
+        glEnd();
+        glPopMatrix();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_ALPHA_TEST);
+    }
+    if (g.crouch_kick) {
+        //Fighter light kick
+        glPushMatrix();
+        glTranslatef(player.pos[0],0,player.pos[2]);
+        glColor3f(1.0, 1.0, 1.0);
+        glBindTexture(GL_TEXTURE_2D, g.crouch_kickTexture);
+        //
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
+        glColor4ub(255,255,255,255);
+        int ix = g.walkFrame % 2;
+        int iy = 0;
+        if (g.walkFrame >= 2)
+            iy = 1;
+        float tx = (float)ix / 2.0;
+        float ty = (float)iy / 1.0;
+        //printf("cx = %f\n cy = %f\n h = %f\n w = %f\n",cx,cy,h,w);
+        glBegin(GL_QUADS);
+        glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
+        glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
+        glTexCoord2f(tx+g.fx, ty);    glVertex2i(cx+w, cy+h);
+        glTexCoord2f(tx+g.fx, ty+1); glVertex2i(cx+w, cy-h);
+        glEnd();
+        glPopMatrix();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_ALPHA_TEST);
+    }
+    if (g.crouch_punch) {
+        //Fighter light kick
+        glPushMatrix();
+        glTranslatef(player.pos[0],0,player.pos[2]);
+        glColor3f(1.0, 1.0, 1.0);
+        glBindTexture(GL_TEXTURE_2D, g.crouch_punchTexture);
+        //
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
+        glColor4ub(255,255,255,255);
+        int ix = g.walkFrame % 2;
+        int iy = 0;
+        if (g.walkFrame >= 2)
+            iy = 1;
+        float tx = (float)ix / 2.0;
+        float ty = (float)iy / 1.0;
+        //printf("cx = %f\n cy = %f\n h = %f\n w = %f\n",cx,cy,h,w);
+        glBegin(GL_QUADS);
+        glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
+        glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
+        glTexCoord2f(tx+g.fx, ty);    glVertex2i(cx+w, cy+h);
+        glTexCoord2f(tx+g.fx, ty+1); glVertex2i(cx+w, cy-h);
         glEnd();
         glPopMatrix();
         glBindTexture(GL_TEXTURE_2D, 0);
