@@ -697,11 +697,16 @@ int checkKeys(XEvent *e)
 		    inGame = true;
 		    break;
 		}
-		else {
+		else if (selected == 2){
 		    inPauseMenu = false;
 		    inTutorial = true;
 		    break;
 		}
+		else {
+		    return 1;
+		    break;
+		}
+
 	    case XK_Up:
 		if (selected == 1)
 		    selected = 1;
