@@ -16,7 +16,10 @@
 #include "fonts.h"
 
 using namespace std;
+<<<<<<< HEAD
 /*
+=======
+>>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
 class Timer {
     public:
     unsigned int sec;
@@ -42,7 +45,11 @@ class Timer {
     r.center = 0;
     }
 }time
+<<<<<<< HEAD
 */
+=======
+
+>>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
 void showLupeName(int x, int y)
 {
 	Rect r;
@@ -105,7 +112,11 @@ void showHealth(int x, int y)
         ggprint8b(&r, 20, c, "Damage... %d", damage);
     } 
 }
+<<<<<<< HEAD
 /*
+=======
+
+>>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
 void showTimer(int x, int y,int timeLeft)
 {
     if (timeLeft !=0) {
@@ -113,6 +124,7 @@ void showTimer(int x, int y,int timeLeft)
 
         
 
+<<<<<<< HEAD
     startTime = clock();
     timeLeft = downTime - sec;
         }
@@ -124,6 +136,19 @@ void showTimer(int x, int y,int timeLeft)
         if(timeLeft!= downTime - sec) {
             timeLeft = downTime - sec;
             ggprint8b(&r, 20, c, "Remaining time: %d\n", timeLeft);
+=======
+    time.startTime = clock();
+    timeLeft = time.downTime - time.sec;
+        }
+
+    //while (timeLeft > 0) {
+       time.countTime = clock();
+        time.milisec = time.countTime - time.startTime;
+        time.sec = (time.milisec/(CLOCKS_PER_SEC));
+        if(timeLeft!= time.downTime - time.sec) {
+            timeLeft = time.downTime - time.sec;
+            ggprint8b(&time.r, 20, time.c, "Remaining time: %d\n", timeLeft);
+>>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
         }
 
        // continue;
@@ -134,6 +159,10 @@ void showTimer(int x, int y,int timeLeft)
 
     return;
 }
+<<<<<<< HEAD
 */
+=======
+
+>>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
 
 

@@ -112,8 +112,13 @@ void showMainMenu(int x, int y, GLuint MainMenuTexture)
 	ggprint12(&r2, 20, 0xFF0000, "Tutorial");
     }
     else if (selected ==3) {
+<<<<<<< HEAD
 	//px = x/2 - 73;
 	//px = y - 390;
+=======
+	px = x/2 - 73;
+	px = y - 390;
+>>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
 	ggprint12(&r2, 20, 0xFF0000, " ");
 	ggprint12(&r2, 20, 0xFF0000, " ");
 	ggprint12(&r2, 20, 0xFF0000, "Exit");
@@ -208,8 +213,13 @@ void PauseMenu(int x, int y, GLuint PauseMenuTexture)
         ggprint12(&r2, 20, 0xFF0000, " ");
         ggprint12(&r2, 20, 0xFF0000, "Tutorial");
     } else if (selected ==3) {
+<<<<<<< HEAD
        // px = x/2 - 73;
        // px = y - 390;
+=======
+        px = x/2 - 73;
+        px = y - 390;
+>>>>>>> d4be7c47601c57df4cfa1711297730adf30d97f7
         ggprint12(&r2, 20, 0xFF0000, " ");
         ggprint12(&r2, 20, 0xFF0000, " ");
         ggprint12(&r2, 20, 0xFF0000, "Exit");
