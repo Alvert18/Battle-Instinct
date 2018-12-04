@@ -10,16 +10,21 @@
 
 #include "lib.h"
 #include "img.h"
-
+#include "iostream";
+using namespace std;
 
 Image img[6] = {
-    "./images/Kang-Walk.gif",
+    "./images/Sprites/Fighter_stance.png",
     "./images/dog.jpg",
     "./images/bunny.png",
     "./images/MainMenu.png",
     "./images/Tutorial.jpg",
     "./images/pause.jpg",
 };
+
+Image Stance = "./images/Sprites/Fighter_stance.png";
+Image Walk = "./images/Sprites/Fighter_walk.png";
+Image Crouch = "./images/Sprites/Fighter_crouch.png";
 
 unsigned char *buildAlphaData(Image *img) {
 	//add 4th component to RGB stream...
@@ -52,8 +57,11 @@ unsigned char *buildAlphaData(Image *img) {
 class Global {
 public:
         int done;
+        float fx;
         int xres, yres;
         int walk;
+        int stand;
+        int crouch;
         bool credits = false;
         int walkFrame;
         double delay;
@@ -66,12 +74,18 @@ public:
         GLuint MainMenuTexture;
 	GLuint TutorialTexture;
 	GLuint PauseMenuTexture;
+    GLuint stanceTexture;
+   // GLuint walkTexture;
+    GLuint crouchTexture;
         Vec box[20];
         Global() {
                 done=0;
                 xres=800;
                 yres=600;
                 walk=0;
+                fx = .18;
+                stand=1;
+                crouch=0;
                 walkFrame=0;
                 delay = 0.1;
                 for (int i=0; i<20; i++) {
@@ -217,10 +231,12 @@ void render(void);
 void show_credits();
 
 
+extern void init_fighters();
 int main(void)
 {
 	initOpengl();
 	init();
+	init_fighters();
 	int done = 0;
 	while (!done) {
 		while (x11.getXPending()) {
@@ -258,8 +274,8 @@ void initOpengl(void)
 	int h = img[0].height;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-		GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
+//	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+//		GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
 
 
 
@@ -302,23 +318,11 @@ void initOpengl(void)
 	glGenTextures(1, &g.MainMenuTexture);
 	glGenTextures(1, &g.TutorialTexture);
 	glGenTextures(1, &g.PauseMenuTexture);
+    //Fighter Textures
+    glGenTextures(1, &g.stanceTexture);
+    //glGenTextures(1, &g.walkTexture);
+    glGenTextures(1, &g.crouchTexture);
 
-	//-------------------------------------------------------------------------
-	//silhouette
-	//this is similar to a sprite graphic
-	//
-	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	//
-	//must build a new set of data...
-	unsigned char *walkData = buildAlphaData(&img[0]);	
-	printf("h = %d \n w = %d",h,w);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, walkData);
-	//free(walkData);
-	//unlink("./images/walk.ppm");
 	//-------------------------------------------------------------------------
 	//Dog picture
 	glBindTexture(GL_TEXTURE_2D, g.sergioTexture);
@@ -368,6 +372,56 @@ void initOpengl(void)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexImage2D(GL_TEXTURE_2D, 0, 3, w6, h6, 0,
                 GL_RGB, GL_UNSIGNED_BYTE, img[5].data);	
+	//-------------------------------------------------------------------------
+	//silhouette
+	//this is similar to a sprite graphic
+	//
+	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	//must build a new set of data...
+	unsigned char *walkData = buildAlphaData(&Walk);	
+	printf("h = %d \n w = %d",h,w);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Walk.width, Walk.height, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, walkData);
+	//free(walkData);
+	//unlink("./images/walk.ppm");
+	//-------------------------------------------------------------------------
+	//Stance
+	//this is similar to a sprite graphic
+	//
+	glBindTexture(GL_TEXTURE_2D, g.stanceTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	//must build a new set of data...
+	unsigned char *stanceData = buildAlphaData(&Stance);	
+	printf("h = %d \n wS = %d",Stance.width,Stance.height);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Stance.width, Stance.height, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, stanceData);
+	//free(walkData);
+	//unlink("./images/walk.ppm");
+	//-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+	//Crouch
+	//this is similar to a sprite graphic
+	//
+	glBindTexture(GL_TEXTURE_2D, g.crouchTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	//must build a new set of data...
+	unsigned char *crouchData = buildAlphaData(&Crouch);	
+	printf("h crouch = %d  w = %d",Crouch.height,Crouch.width);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Crouch.width, Crouch.height, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, crouchData);
+	//free(walkData);
+	//unlink("./images/walk.ppm");
+	//-------------------------------------------------------------------------
 }
 
 void init() {
@@ -489,7 +543,15 @@ int checkKeys(XEvent *e)
                                 }
                                 }
 					
-	if (inGame) {	
+	if (inGame) {
+        if (e->type != KeyPress && ) {
+            printf ("KeyRelease!\n");
+			VecCopy(player.pos, player.lastpos);
+			g.walk = 0;
+            g.crouch = 0;
+            g.stand = 0;
+        }
+        else    
 		switch (key) {
 			case XK_w:
 				timers.recordTime(&timers.walkTime);
@@ -504,17 +566,37 @@ int checkKeys(XEvent *e)
 		case XK_Left:
 			VecCopy(player.pos, player.lastpos);
 			player.pos[0] -= 10.0;
-			g.walk^=1;
+			g.walk = 1;
+            g.crouch = 0;
+            g.stand = 0;
 			break;
 		case XK_Right:
 			VecCopy(player.pos, player.lastpos);
 			player.pos[0] += 10.0;
-			g.walk^=1;
+			g.walk = 1;
+            g.crouch = 0;
+            g.stand = 0;
 			break;
 		case XK_Up:
+      //      g.fx = g.fx + 0.1;
+      //      printf("fx = %f\n",g.fx);
 			break;
 		case XK_Down:
+           // g.fx--;
+      //      g.fx = g.fx - 0.1;
+      //      printf("fx = %f\n",g.fx);
+			g.walk = 0;
+            g.crouch = 1;
+            g.stand = 0;
 			break;
+        case KeyRelease:
+            printf("KeyRelease!\n");
+			VecCopy(player.pos, player.lastpos);
+			g.walk = 0;
+            g.crouch = 0;
+            g.stand = 0;
+            break;
+            
 		case XK_equal:
 			g.delay -= 0.005;
 			if (g.delay < 0.005)
@@ -560,8 +642,8 @@ void physics(void)
 		if (timeSpan > g.delay) {
 			//advance
 			++g.walkFrame;
-			if (g.walkFrame >= 16)
-				g.walkFrame -= 16;
+			if (g.walkFrame >= 5)
+				g.walkFrame -= 5;
 			timers.recordTime(&timers.walkTime);
 		}
 		for (int i=0; i<20; i++) {
@@ -570,137 +652,224 @@ void physics(void)
 				g.box[i][0] += g.xres + 10.0;
 		}
 	}
+    if (g.stand) {
+        //man is standing
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+		if (timeSpan > g.delay) {
+			//advance
+			++g.walkFrame;
+			if (g.walkFrame >= 4)
+				g.walkFrame -= 4;
+			timers.recordTime(&timers.walkTime);
+		}
+    }
+    if (g.crouch) {
+        //man is standing
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+		if (timeSpan > g.delay) {
+			//advance
+			g.walkFrame = 1;
+			timers.recordTime(&timers.walkTime);
+		}
+    }
+    
+}
+
+void renderFighter(float cx, float cy, float w, float h) {
+
+    if (g.stand) {
+        //Fighter Stance
+        glPushMatrix();
+        glTranslatef(player.pos[0],0,player.pos[2]);
+        glColor3f(1.0, 1.0, 1.0);
+        glBindTexture(GL_TEXTURE_2D, g.stanceTexture);
+        //
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
+        glColor4ub(255,255,255,255);
+        int ix = g.walkFrame % 5;
+        int iy = 0;
+        if (g.walkFrame >= 5)
+            iy = 1;
+        float tx = (float)ix / 5.0;
+        float ty = (float)iy / 1.0;
+        //printf("cx = %f\n cy = %f\n h = %f\n w = %f\n",cx,cy,h,w);
+        glBegin(GL_QUADS);
+        glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
+        glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
+        glTexCoord2f(tx+.18, ty);    glVertex2i(cx+w, cy+h);
+        glTexCoord2f(tx+.18, ty+1); glVertex2i(cx+w, cy-h);
+        glEnd();
+        glPopMatrix();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_ALPHA_TEST);
+    }
+    if (g.walk) {
+        //Fighter Walk
+        glPushMatrix();
+        glTranslatef(player.pos[0],0,player.pos[2]);
+        glColor3f(1.0, 1.0, 1.0);
+        glBindTexture(GL_TEXTURE_2D, g.walkTexture);
+        //
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
+        glColor4ub(255,255,255,255);
+        int ix = g.walkFrame % 4;
+        int iy = 0;
+        if (g.walkFrame >= 4)
+            iy = 1;
+        float tx = (float)ix / 4.0;
+        float ty = (float)iy / 1.0;
+        //printf("cx = %f\n cy = %f\n h = %f\n w = %f\n",cx,cy,h,w);
+        glBegin(GL_QUADS);
+        glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
+        glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
+        glTexCoord2f(tx+.2, ty);    glVertex2i(cx+w, cy+h);
+        glTexCoord2f(tx+.2, ty+1); glVertex2i(cx+w, cy-h);
+        glEnd();
+        glPopMatrix();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_ALPHA_TEST);
+    }
+    if (g.crouch) {
+        //Fighter Crouch
+        glPushMatrix();
+        glTranslatef(player.pos[0],0,player.pos[2]);
+        glColor3f(1.0, 1.0, 1.0);
+        glBindTexture(GL_TEXTURE_2D, g.crouchTexture);
+        //
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
+        glColor4ub(255,255,255,255);
+        int ix = g.walkFrame % 1;
+        int iy = 0;
+        if (g.walkFrame >= 1)
+            iy = 1;
+        float tx = (float)ix / 1.0;
+        float ty = (float)iy / 1.0;
+        //printf("cx = %f\n cy = %f\n h = %f\n w = %f\n",cx,cy,h,w);
+        glBegin(GL_QUADS);
+        glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
+        glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
+        glTexCoord2f(tx+1, ty);    glVertex2i(cx+w, cy+h);
+        glTexCoord2f(tx+1, ty+1); glVertex2i(cx+w, cy-h);
+        glEnd();
+        glPopMatrix();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_ALPHA_TEST);
+    }
+
+
+
 }
 
 void render(void)
 {
-	//printf("ingame = %d\n",inGame);
-	//printf("inMain = %d\n",inMainMenu);
-    	if(inMainMenu) { 
-	    showMainMenu(g.xres, g.yres,g.MainMenuTexture);
-		    
+    //printf("ingame = %d\n",inGame);
+    //printf("inMain = %d\n",inMainMenu);
+    if(inMainMenu) { 
+        showMainMenu(g.xres, g.yres,g.MainMenuTexture);
 
-	}
-	else if (inTutorial) 
-	{
-		tutorial(g.xres,g.yres,g.TutorialTexture);
-	}
-	else if (inPauseMenu)
-        {
-                PauseMenu(g.xres, g.yres,g.PauseMenuTexture);
+
+    }
+    else if (inTutorial) 
+    {
+        tutorial(g.xres,g.yres,g.TutorialTexture);
+    }
+    else if (inPauseMenu)
+    {
+        PauseMenu(g.xres, g.yres,g.PauseMenuTexture);
+    }
+    else if(inGame)
+    {
+        extern void render_fighters(int walkFrame,float cy, float cx, Vec pos, GLuint S);
+        Rect r;
+        //int ix,iy,tx,ty;
+        //Clear the screen
+        glClearColor(0.1, 0.1, 0.1, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        float cx = g.xres/2.0;
+        float cy = g.yres/2.0;
+        //
+        //show ground
+        glBegin(GL_QUADS);
+        glColor3f(0.2, 0.2, 0.2);
+        glVertex2i(0,       220);
+        glVertex2i(g.xres, 220);
+        glColor3f(0.4, 0.4, 0.4);
+        glVertex2i(g.xres,   0);
+        glVertex2i(0,         0);
+        glEnd();
+        //show boxes as background
+        for (int i=0; i<20; i++) {
+            glPushMatrix();
+            glTranslated(g.box[i][0],g.box[i][1],g.box[i][2]);
+            glColor3f(0.2, 0.2, 0.2);
+            glBegin(GL_QUADS);
+            glVertex2i( 0,  0);
+            glVertex2i( 0, 30);
+            glVertex2i(20, 30);
+            glVertex2i(20,  0);
+            glEnd();
+            glPopMatrix();
         }
-	else if(inGame)
-	{
-	extern void render_fighters(int walkFrame,int cy, int cx, Vec pos);
-	extern void init_fighters();
-    	Rect r;
-	//int ix,iy,tx,ty;
-	//Clear the screen
-	glClearColor(0.1, 0.1, 0.1, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	float cx = g.xres/2.0;
-	float cy = g.yres/2.0;
-	//
-	//show ground
-	glBegin(GL_QUADS);
-		glColor3f(0.2, 0.2, 0.2);
-		glVertex2i(0,       220);
-		glVertex2i(g.xres, 220);
-		glColor3f(0.4, 0.4, 0.4);
-		glVertex2i(g.xres,   0);
-		glVertex2i(0,         0);
-	glEnd();
-	//show boxes as background
-	for (int i=0; i<20; i++) {
-		glPushMatrix();
-		glTranslated(g.box[i][0],g.box[i][1],g.box[i][2]);
-		glColor3f(0.2, 0.2, 0.2);
-		glBegin(GL_QUADS);
-			glVertex2i( 0,  0);
-			glVertex2i( 0, 30);
-			glVertex2i(20, 30);
-			glVertex2i(20,  0);
-		glEnd();
-		glPopMatrix();
-	}
-	init_fighters();
-	//render_fighters(g.walkFrame,cy,cx,player.pos);
+        //render_fighters(g.walkFrame,cy,cx,player.pos, g.walkTexture);
+        //
+        float h = 200.0;
+        float w = h * 0.5;
+        renderFighter(cx,cy,w,h);
 
-	float h = 200.0;
-	float w = h * 0.5;
-	glPushMatrix();
-	glTranslatef(player.pos[0],0,player.pos[2]);
-	glColor3f(1.0, 1.0, 1.0);
-	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
-	//
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.0f);
-	glColor4ub(255,255,255,255);
-	int ix = g.walkFrame % 7;
-	int iy = 0;
-	if (g.walkFrame >= 7)
-		iy = 1;
-	float tx = (float)ix / 7.0;
-	float ty = (float)iy / 1.0;
-	glBegin(GL_QUADS);
-		glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
-		glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
-		glTexCoord2f(tx+.1, ty);    glVertex2i(cx+w, cy+h);
-		glTexCoord2f(tx+.1, ty+1); glVertex2i(cx+w, cy-h);
-	glEnd();
-	glPopMatrix();
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glDisable(GL_ALPHA_TEST);
-	
-	unsigned int c = 0x00ffff44;
+        unsigned int c = 0x00ffff44;
 
-	//Show Credits
-	if (g.credits) {
-	    int x = g.xres/2 - 30;
-	    int y = g.yres - 20;
-	    extern void show_credits_Alberto(int x,int y);
-	    extern void show_credits_Sergio(int x,int y);
-	    extern void showLupeName(int x, int y);
-	    extern void showSergioPicture(int x, int y, GLuint texid);
-	    extern void showAlbertoPicture(int x, int y, float tx, float ty, GLuint texid);
-	    extern void showLupePicture(int x, int y, GLuint texid);
+        //Show Credits
+        if (g.credits) {
+            int x = g.xres/2 - 30;
+            int y = g.yres - 20;
+            extern void show_credits_Alberto(int x,int y);
+            extern void show_credits_Sergio(int x,int y);
+            extern void showLupeName(int x, int y);
+            extern void showSergioPicture(int x, int y, GLuint texid);
+            extern void showAlbertoPicture(int x, int y, float tx, float ty, GLuint texid);
+            extern void showLupePicture(int x, int y, GLuint texid);
 
-	    showSergioPicture (x-100, y-40, g.MainMenuTexture);
-	    showAlbertoPicture(x+200,  y-40,  tx, ty, g.walkTexture);
-	    showLupePicture(x-100, y-150, g.guadalupeTexture);
-	    show_credits();
-	    show_credits_Alberto(x,y-20);
-	    show_credits_Sergio(x,y-40);
-	    showLupeName(x,y-60);
-	    
+            showSergioPicture (x-100, y-40, g.MainMenuTexture);
+            //   showAlbertoPicture(x+200,  y-40,  tx, ty, g.walkTexture);
+            showLupePicture(x-100, y-150, g.guadalupeTexture);
+            show_credits();
+            show_credits_Alberto(x,y-20);
+            show_credits_Sergio(x,y-40);
+            showLupeName(x,y-60);
 
-	  //show dog pic
-	 /* 
-	  int wid=40;
-	  glPushMatrix();
-	  glTranslatef(200, 200, 0);
-	  glBindTexture(GL_TEXTURE_2D, g.sergioTexture);
-	  glBegin(GL_QUADS);
-	  	glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid, -wid);
-		glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-		glTexCoord2f(1.0f, 0.0f); glVertex2i(wid, wid);
-		glTexCoord2f(1.0f, 1.0f); glVertex2i(wid, -wid);
-	  glEnd();
-	  glPopMatrix();
-	    return;
-	    */
-	}
-	r.bot = g.yres - 20;
-	r.left = 10;
-	r.center = 0;
-	ggprint8b(&r, 16, c, "C   Credits");
-	ggprint8b(&r, 16, c, "W   Walk cycle");
-	ggprint8b(&r, 16, c, "+   faster");
-	ggprint8b(&r, 16, c, "-   slower");
-	ggprint8b(&r, 16, c, "right arrow -> walk right");
-	ggprint8b(&r, 16, c, "left arrow  <- walk left");
-	ggprint8b(&r, 16, c, "frame: %i", g.walkFrame);
-}
+
+            //show dog pic
+            /* 
+               int wid=40;
+               glPushMatrix();
+               glTranslatef(200, 200, 0);
+               glBindTexture(GL_TEXTURE_2D, g.sergioTexture);
+               glBegin(GL_QUADS);
+               glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid, -wid);
+               glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+               glTexCoord2f(1.0f, 0.0f); glVertex2i(wid, wid);
+               glTexCoord2f(1.0f, 1.0f); glVertex2i(wid, -wid);
+               glEnd();
+               glPopMatrix();
+               return;
+               */
+        }
+        r.bot = g.yres - 20;
+        r.left = 10;
+        r.center = 0;
+        ggprint8b(&r, 16, c, "C   Credits");
+        ggprint8b(&r, 16, c, "W   Walk cycle");
+        ggprint8b(&r, 16, c, "+   faster");
+        ggprint8b(&r, 16, c, "-   slower");
+        ggprint8b(&r, 16, c, "right arrow -> walk right");
+        ggprint8b(&r, 16, c, "left arrow  <- walk left");
+        ggprint8b(&r, 16, c, "frame: %i", g.walkFrame);
+    }
 }
 
 

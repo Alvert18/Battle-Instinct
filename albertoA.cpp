@@ -14,6 +14,7 @@ using namespace std;
 
 
 
+//Image fighter_stance = "./images/Sprites/Fighter_stance.png";
 Image fighter_stance = "./images/Kang-Walk.gif";
 
 class Fighter {
@@ -87,7 +88,7 @@ void init_fighters() {
 }
 
 
-void render_fighters(int walkFrame, int cy, int cx, Vec pos ) {
+void render_fighters(int walkFrame, float cy, float cx, Vec pos, GLuint S ) {
 
     
     float h = 200.0;
@@ -95,17 +96,19 @@ void render_fighters(int walkFrame, int cy, int cx, Vec pos ) {
     glPushMatrix();
     glTranslatef(pos[0],0,pos[2]);
     glColor3f(1.0, 1.0, 1.0);
-    glBindTexture(GL_TEXTURE_2D, fighter.stance);
+    glBindTexture(GL_TEXTURE_2D, S);
     //
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0f);
     glColor4ub(255,255,255,255);
+    printf("\n\n AFTER color : h = %f\n w = %f\n",h,w);
     int ix = walkFrame % 7;
     int iy = 0;
     if (walkFrame >= 7)
 	iy = 1;
     int tx = (float)ix / 7.0;
     int ty = (float)iy / 1.0;
+    printf("SECOND cx = %f\n cy = %f\n, h = %f, w = %f\n",cx,cy,h,w);
     glBegin(GL_QUADS);
     glTexCoord2f(tx,      ty+1); glVertex2i(cx-w, cy-h);
     glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
